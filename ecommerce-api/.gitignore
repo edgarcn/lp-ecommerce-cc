@@ -1,0 +1,48 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# User secrets (local dev sensitive config)
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+# dotnet user-secrets are stored outside the project by default,
+# but guard against accidental local files
+**/Properties/launchSettings.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Test results
+TestResults/
+coverage/
+*.coveragexml
+*.trx
+
+# Publish output
+publish/
+**/publish/
+
+# Docker
+.dockerignore
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
