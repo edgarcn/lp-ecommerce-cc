@@ -1,0 +1,59 @@
+<h1>Payment Information</h1>
+<p class="subtitle">This is a demo — no real payment is processed and card details are not stored.</p>
+
+<div class="card-preview">
+  <span class="chip">◆</span>
+  <span class="card-num">•••• •••• •••• {{ last4() }}</span>
+  <div class="card-meta">
+    <div>
+      <span class="muted">CARD HOLDER</span>
+      <span>{{ cardholderName() || 'Your Name' }}</span>
+    </div>
+    <div>
+      <span class="muted">EXPIRES</span>
+      <span>{{ expiry() || 'MM/YY' }}</span>
+    </div>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="form">
+  <div class="field">
+    <label>Card Number <span class="required">*</span></label>
+    <input type="text" formControlName="cardNumber" placeholder="1234 5678 9012 3456" inputmode="numeric" />
+    @if (form.get('cardNumber')?.touched && form.get('cardNumber')?.invalid) {
+      <span class="error-text">Enter a valid card number.</span>
+    }
+  </div>
+
+  <div class="field">
+    <label>Name on Card <span class="required">*</span></label>
+    <input type="text" formControlName="cardholderName" />
+    @if (form.get('cardholderName')?.touched && form.get('cardholderName')?.invalid) {
+      <span class="error-text">Name on card is required.</span>
+    }
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>Expiry Date <span class="required">*</span></label>
+      <input type="text" formControlName="expiry" placeholder="MM/YY" />
+      @if (form.get('expiry')?.touched && form.get('expiry')?.invalid) {
+        <span class="error-text">Use MM/YY format.</span>
+      }
+    </div>
+    <div class="field">
+      <label>CVV <span class="required">*</span></label>
+      <input type="text" formControlName="cvv" placeholder="123" inputmode="numeric" />
+      @if (form.get('cvv')?.touched && form.get('cvv')?.invalid) {
+        <span class="error-text">3–4 digits.</span>
+      }
+    </div>
+  </div>
+
+  <span class="ssl">🔒 Demo checkout — card data never leaves your browser unencrypted and is not saved.</span>
+
+  <div class="actions">
+    <button type="button" class="btn btn-ghost" (click)="back()">← Back</button>
+    <button type="submit" class="btn btn-primary">Review Order</button>
+  </div>
+</form>

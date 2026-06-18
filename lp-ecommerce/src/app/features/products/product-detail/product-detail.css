@@ -1,0 +1,108 @@
+.page {
+  padding-top: 24px;
+  padding-bottom: 56px;
+}
+.back {
+  display: inline-block;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+.back:hover { color: var(--color-text); }
+
+.status {
+  color: var(--color-text-muted);
+  padding: 60px 0;
+  text-align: center;
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.media {
+  max-width: 420px;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.category {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+.name {
+  font-size: 2rem;
+}
+.price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+.description {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.specs {
+  display: flex;
+  gap: 40px;
+  margin: 10px 0;
+  padding: 18px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.specs dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+.specs dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.purchase {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+.qty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+}
+.step {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.step:disabled { opacity: 0.4; cursor: not-allowed; }
+.step:not(:disabled):hover { border-color: var(--color-primary); color: var(--color-primary); }
+.count { min-width: 20px; text-align: center; font-weight: 700; }
+
+.stock-note {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 768px) {
+  .detail { grid-template-columns: 1fr; gap: 28px; }
+}

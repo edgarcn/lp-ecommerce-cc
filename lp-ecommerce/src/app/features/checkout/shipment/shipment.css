@@ -1,0 +1,18 @@
+h1 { font-size: 1.8rem; }
+.subtitle {
+  color: var(--color-text-muted);
+  margin: 6px 0 28px;
+}
+.row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 16px;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+@media (max-width: 600px) {
+  .row { grid-template-columns: 1fr; }
+}

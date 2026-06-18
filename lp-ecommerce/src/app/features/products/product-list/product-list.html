@@ -1,0 +1,25 @@
+<section class="container page">
+  <header class="page-head">
+    <h1>All Products</h1>
+    <span class="count">{{ total() }} items</span>
+  </header>
+
+  @if (loading()) {
+    <p class="status">Loading products…</p>
+  } @else if (products().length === 0) {
+    <p class="status">No products found.</p>
+  } @else {
+    <div class="grid">
+      @for (product of products(); track product.productId) {
+        <app-product-card [product]="product" />
+      }
+    </div>
+
+    @if (loadingMore()) {
+      <p class="status loading-more">Loading more…</p>
+    }
+  }
+
+  <!-- Infinite-scroll trigger: observed by IntersectionObserver -->
+  <div #sentinel class="sentinel" aria-hidden="true"></div>
+</section>

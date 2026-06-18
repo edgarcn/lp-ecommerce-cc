@@ -1,0 +1,16 @@
+import { Component, inject } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { StorefrontUiService } from './core/services/storefront-ui.service';
+import { CartPane } from './shared/components/cart-pane/cart-pane';
+import { Header } from './shared/components/header/header';
+import { ToastHost } from './shared/components/toast-host/toast-host';
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet, Header, CartPane, ToastHost],
+  templateUrl: './app.html',
+  styleUrl: './app.css',
+})
+export class App {
+  readonly ui = inject(StorefrontUiService);
+}

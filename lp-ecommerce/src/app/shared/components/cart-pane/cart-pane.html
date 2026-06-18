@@ -1,0 +1,41 @@
+<div class="overlay" (click)="close.emit()"></div>
+<aside class="pane">
+  <header class="pane-head">
+    <h2>Your Cart ({{ cart.count() }})</h2>
+    <button class="icon-btn" (click)="close.emit()" aria-label="Close cart">✕</button>
+  </header>
+
+  <div class="pane-body">
+    @if (cart.items().length === 0) {
+      <p class="empty">Your cart is empty.</p>
+    } @else {
+      @for (item of cart.items(); track item.productId) {
+        <div class="line">
+          <app-product-image [name]="item.name" [seed]="item.productId" [size]="56" />
+          <div class="line-info">
+            <span class="line-name">{{ item.name }}</span>
+            <span class="line-price">{{ item.price * item.quantity | currency }}</span>
+            <div class="qty">
+              <button class="icon-btn small" (click)="cart.remove(item.productId)" aria-label="Remove">🗑</button>
+              <button class="step" (click)="cart.decrement(item.productId)" aria-label="Decrease">−</button>
+              <span class="count">{{ item.quantity }}</span>
+              <button class="step" (click)="cart.increment(item.productId)" aria-label="Increase">+</button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  @if (cart.items().length > 0) {
+    <footer class="pane-foot">
+      <div class="subtotal">
+        <span>Subtotal</span>
+        <span class="amount">{{ cart.subtotal() | currency }}</span>
+      </div>
+      <button class="btn btn-primary block" [disabled]="validating()" (click)="checkout()">
+        {{ validating() ? 'Checking stock…' : 'Checkout' }}
+      </button>
+    </footer>
+  }
+</aside>

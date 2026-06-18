@@ -1,0 +1,11 @@
+<app-header />
+
+<main>
+  <router-outlet />
+</main>
+
+@if (ui.paneOpen()) {
+  <app-cart-pane (close)="ui.closePane()" />
+}
+
+<app-toast-host />

@@ -1,0 +1,63 @@
+.checkout {
+  padding-top: 24px;
+  padding-bottom: 64px;
+  max-width: 760px;
+}
+.back {
+  display: inline-block;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin-bottom: 28px;
+}
+.back:hover { color: var(--color-text); }
+
+.stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 36px;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.step.active .dot,
+.step.done .dot {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+.step.active .label,
+.step.done .label {
+  color: var(--color-primary);
+}
+.line {
+  flex: 1;
+  height: 2px;
+  background: var(--color-border);
+  margin: 0 12px;
+  margin-bottom: 26px;
+}
+.line.filled {
+  background: var(--color-primary);
+}
