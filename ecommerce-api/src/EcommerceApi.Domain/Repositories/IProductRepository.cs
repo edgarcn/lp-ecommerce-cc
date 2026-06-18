@@ -6,6 +6,7 @@ public interface IProductRepository
 {
     Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedAsync(
         string? name, string? category, string? sku, int page, int pageSize);
+    Task<IEnumerable<string>> GetCategoriesAsync();
     Task<Product?> GetByIdAsync(int productId);
     Task<Product?> GetBySkuAsync(string sku);
     Task<IEnumerable<Product>> GetBySkusAsync(IEnumerable<string> skus);

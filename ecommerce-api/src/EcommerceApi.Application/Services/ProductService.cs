@@ -19,6 +19,8 @@ public class ProductService(IProductRepository repo)
         return new PagedResult<ProductDto>(items.Select(ToDto), total, page, pageSize);
     }
 
+    public Task<IEnumerable<string>> GetCategoriesAsync() => repo.GetCategoriesAsync();
+
     public async Task<ProductDto?> GetByIdAsync(int productId)
     {
         var product = await repo.GetByIdAsync(productId);

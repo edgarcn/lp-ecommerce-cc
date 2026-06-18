@@ -29,6 +29,14 @@ public class ProductRepository(AppDbContext db) : IProductRepository
         return (items, total);
     }
 
+    public async Task<IEnumerable<string>> GetCategoriesAsync() =>
+        await db.Products
+            .Where(p => p.Active)
+            .Select(p => p.Category)
+            .Distinct()
+            .OrderBy(c => c)
+            .ToListAsync();
+
     public Task<Product?> GetByIdAsync(int productId) =>
         db.Products.FirstOrDefaultAsync(p => p.ProductId == productId);
 

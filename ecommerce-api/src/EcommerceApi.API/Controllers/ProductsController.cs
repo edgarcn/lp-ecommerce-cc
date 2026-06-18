@@ -22,6 +22,14 @@ public class ProductsController(ProductService productService) : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("categories")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetCategories()
+    {
+        var categories = await productService.GetCategoriesAsync();
+        return Ok(categories);
+    }
+
     [HttpGet("{productId:int}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetById(int productId)
