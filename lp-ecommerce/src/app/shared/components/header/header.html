@@ -1,0 +1,42 @@
+<header class="site-header">
+  <div class="container bar">
+    <a routerLink="/" class="brand">
+      <span class="logo">◆</span>
+      <span class="brand-name">Velour</span>
+    </a>
+
+    @if (ui.showSearch()) {
+      <form class="search" (submit)="$event.preventDefault(); onSubmit()">
+        <select
+          class="cat"
+          [value]="category()"
+          (change)="onCategoryChange($any($event.target).value)"
+        >
+          <option value="">All</option>
+          @for (cat of ui.categories(); track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input
+            type="text"
+            placeholder="Search products..."
+            [ngModel]="term()"
+            (ngModelChange)="term.set($event)"
+            name="term"
+          />
+        </div>
+      </form>
+    } @else {
+      <span class="spacer"></span>
+    }
+
+    <button class="cart-btn" (click)="ui.openPane()" aria-label="Open cart">
+      <span class="cart-icon">🛒</span>
+      @if (cart.count() > 0) {
+        <span class="badge">{{ cart.count() }}</span>
+      }
+    </button>
+  </div>
+</header>

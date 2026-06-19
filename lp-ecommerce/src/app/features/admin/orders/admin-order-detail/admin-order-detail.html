@@ -1,0 +1,100 @@
+<a routerLink="/admin/orders" class="back">← Back to orders</a>
+
+@if (loading()) {
+  <p class="admin-status">Loading…</p>
+} @else if (notFound()) {
+  <p class="admin-status">Order not found.</p>
+} @else if (order(); as o) {
+  <div class="detail-head">
+    <div>
+      <h1>Order #{{ o.orderId }}</h1>
+      <span class="placed">Placed {{ o.placedDate | date: 'medium' }}</span>
+    </div>
+    <span class="badge" [class]="'s' + o.orderStatus">{{ statusLabel(o.orderStatus) }}</span>
+  </div>
+
+  <div class="cards">
+    <div class="info-card">
+      <h3>Customer</h3>
+      <p class="name">{{ o.customerFirstName }} {{ o.customerLastName }}</p>
+      <p class="muted">{{ o.customerEmail }}</p>
+    </div>
+
+    <div class="info-card">
+      <h3>Delivery Address</h3>
+      <p class="name">{{ o.deliveryAddress.fullname }}</p>
+      <p class="muted">
+        @if (o.deliveryAddress.unitSuiteNumber) { {{ o.deliveryAddress.unitSuiteNumber }}<br /> }
+        {{ o.deliveryAddress.streetAddress }}<br />
+        {{ o.deliveryAddress.city }}, {{ o.deliveryAddress.state }} {{ o.deliveryAddress.zipCode }}<br />
+        {{ o.deliveryAddress.countryRegion }}
+      </p>
+      @if (o.deliveryAddress.deliveryInstructions) {
+        <p class="muted instr">"{{ o.deliveryAddress.deliveryInstructions }}"</p>
+      }
+    </div>
+
+    <div class="info-card">
+      <h3>Payment</h3>
+      @if (o.payment; as p) {
+        <p class="name">{{ p.cardBrand }} •••• {{ p.cardLast4 }}</p>
+        <p class="muted">{{ p.cardholderName }}</p>
+        <p class="muted">{{ p.amountPaid | currency }} · {{ p.transactionReference }}</p>
+      } @else {
+        <p class="muted">No payment record.</p>
+      }
+    </div>
+  </div>
+
+  <div class="items">
+    <div class="items-head">ITEMS</div>
+    @for (line of o.orderLines; track line.orderLineId) {
+      <div class="item">
+        <div class="item-info">
+          <span class="item-name">{{ line.productName }}</span>
+          <span class="muted">{{ line.productSku }} · Qty {{ line.quantity }}</span>
+        </div>
+        <span class="item-price">{{ line.totalLine | currency }}</span>
+      </div>
+    }
+    <div class="total-row">
+      <span>Total</span>
+      <span class="total-amount">{{ o.total | currency }}</span>
+    </div>
+  </div>
+
+  @if (o.shippingInfo) {
+    <div class="ship-info">
+      <h3>Shipping</h3>
+      <p>{{ o.shippingInfo.shippingServiceName }} · Tracking {{ o.shippingInfo.trackingNumber }}</p>
+    </div>
+  }
+
+  @if (o.orderStatus === OrderStatus.Open) {
+    <div class="deliver-card">
+      <h3>Mark as Delivered</h3>
+      <p class="muted">Provide shipping details to complete this order.</p>
+      <form [formGroup]="shipForm" (ngSubmit)="markDelivered()">
+        <div class="row">
+          <div class="field">
+            <label>Shipping Service <span class="required">*</span></label>
+            <input type="text" formControlName="shippingServiceName" placeholder="e.g. FedEx" />
+          </div>
+          <div class="field">
+            <label>Tracking Number <span class="required">*</span></label>
+            <input type="text" formControlName="trackingNumber" placeholder="e.g. FX123456789" />
+          </div>
+        </div>
+        <div class="deliver-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            {{ saving() ? 'Saving…' : 'Mark as Delivered' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  } @else {
+    <div class="closed-note">
+      This order is <strong>{{ statusLabel(o.orderStatus) }}</strong> and its status can no longer be changed.
+    </div>
+  }
+}

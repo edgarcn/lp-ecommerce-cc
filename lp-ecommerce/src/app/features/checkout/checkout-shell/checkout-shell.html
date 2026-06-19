@@ -1,0 +1,23 @@
+<section class="container checkout">
+  <a routerLink="/" class="back">← Back to cart</a>
+
+  <nav class="stepper">
+    @for (step of steps; track step.key; let i = $index) {
+      <div
+        class="step"
+        [class.active]="i === activeIndex()"
+        [class.done]="i < activeIndex()"
+      >
+        <span class="dot">
+          @if (i < activeIndex()) { ✓ } @else { {{ i + 1 }} }
+        </span>
+        <span class="label">{{ step.label }}</span>
+      </div>
+      @if (!$last) {
+        <span class="line" [class.filled]="i < activeIndex()"></span>
+      }
+    }
+  </nav>
+
+  <router-outlet />
+</section>

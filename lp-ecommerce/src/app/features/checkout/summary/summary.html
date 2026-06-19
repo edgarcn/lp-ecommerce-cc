@@ -1,0 +1,53 @@
+<h1>Order Summary</h1>
+<p class="subtitle">Please review your order before confirming.</p>
+
+<div class="cards">
+  <div class="info-card">
+    <h3>📍 Delivery Address</h3>
+    @if (draft().shipment; as s) {
+      <p class="name">{{ s.fullname }}</p>
+      <p class="muted">
+        @if (s.unitSuiteNumber) { {{ s.unitSuiteNumber }}<br /> }
+        {{ s.streetAddress }}<br />
+        {{ s.city }}, {{ s.state }} {{ s.zipCode }}<br />
+        {{ s.countryRegion }}
+      </p>
+      @if (s.deliveryInstructions) {
+        <p class="muted instr">"{{ s.deliveryInstructions }}"</p>
+      }
+    }
+  </div>
+
+  <div class="info-card">
+    <h3>💳 Payment Method</h3>
+    <p class="name">Credit Card</p>
+    <p class="muted">•••• •••• •••• {{ cardLast4() }}</p>
+    <p class="muted">{{ draft().payment?.cardholderName }}</p>
+    <p class="muted">Expires {{ draft().payment?.expiry }}</p>
+  </div>
+</div>
+
+<div class="items">
+  <div class="items-head">ITEMS IN ORDER</div>
+  @for (item of cart.items(); track item.productId) {
+    <div class="item">
+      <app-product-image [name]="item.name" [seed]="item.productId" [size]="48" />
+      <div class="item-info">
+        <span class="item-name">{{ item.name }}</span>
+        <span class="muted">Qty: {{ item.quantity }}</span>
+      </div>
+      <span class="item-price">{{ item.price * item.quantity | currency }}</span>
+    </div>
+  }
+  <div class="total-row">
+    <span>Total</span>
+    <span class="total-amount">{{ cart.subtotal() | currency }}</span>
+  </div>
+</div>
+
+<div class="actions">
+  <button type="button" class="btn btn-ghost" (click)="back()">← Back</button>
+  <button class="btn btn-primary" [disabled]="placing()" (click)="complete()">
+    🔒 {{ placing() ? 'Placing order…' : ('Complete Purchase · ' + (cart.subtotal() | currency)) }}
+  </button>
+</div>

@@ -1,0 +1,29 @@
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="brand">
+      <span class="logo">◆</span>
+      <span class="brand-name">Velour</span>
+    </div>
+    <h1>Admin Sign In</h1>
+    <p class="subtitle">Sign in to manage products and orders.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label>Username <span class="required">*</span></label>
+        <input type="text" formControlName="username" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Password <span class="required">*</span></label>
+        <input type="password" formControlName="password" autocomplete="current-password" />
+      </div>
+
+      @if (error()) {
+        <p class="error-banner">{{ error() }}</p>
+      }
+
+      <button type="submit" class="btn btn-primary block" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in…' : 'Sign In' }}
+      </button>
+    </form>
+  </div>
+</div>

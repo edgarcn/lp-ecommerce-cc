@@ -1,0 +1,66 @@
+<a routerLink="/admin/products" class="back">← Back to products</a>
+
+<h1>Batch Upload Products</h1>
+<p class="subtitle">Upload a CSV file to create products and update stock. Required columns: name, sku, description, category, price, stock, weight_kg.</p>
+
+<div class="upload-card">
+  <label class="dropzone">
+    <input type="file" accept=".csv" (change)="onFileSelected($event)" hidden />
+    <span class="dz-icon">⬆</span>
+    @if (file()) {
+      <span class="dz-file">{{ file()!.name }}</span>
+      <span class="dz-hint">{{ (file()!.size / 1024).toFixed(1) }} KB · click to choose another</span>
+    } @else {
+      <span class="dz-file">Choose a CSV file</span>
+      <span class="dz-hint">Click to browse</span>
+    }
+  </label>
+
+  <div class="upload-actions">
+    @if (file()) {
+      <button class="btn btn-ghost" (click)="reset()">Clear</button>
+    }
+    <button class="btn btn-primary" [disabled]="!file() || uploading()" (click)="upload()">
+      {{ uploading() ? 'Uploading…' : 'Upload' }}
+    </button>
+  </div>
+</div>
+
+@if (requestError()) {
+  <div class="msg-block error">
+    <h3>Upload failed</h3>
+    <p>{{ requestError() }}</p>
+  </div>
+}
+
+@if (result(); as r) {
+  @if (succeeded) {
+    <div class="msg-block success">
+      <h3>✓ Upload successful</h3>
+      <p>{{ r.created }} product(s) created · {{ r.updated }} updated.</p>
+    </div>
+  } @else {
+    <div class="msg-block error">
+      <h3>✕ Upload rejected — nothing was imported</h3>
+      <p>Fix the {{ r.errors.length }} problem row(s) below and try again.</p>
+    </div>
+  }
+
+  @if (r.errors.length > 0) {
+    <div class="msg-block error">
+      <h3>Errors ({{ r.errors.length }})</h3>
+      <ul>
+        @for (e of r.errors; track e) { <li>{{ e }}</li> }
+      </ul>
+    </div>
+  }
+
+  @if (r.warnings.length > 0) {
+    <div class="msg-block warning">
+      <h3>Warnings ({{ r.warnings.length }})</h3>
+      <ul>
+        @for (w of r.warnings; track w) { <li>{{ w }}</li> }
+      </ul>
+    </div>
+  }
+}

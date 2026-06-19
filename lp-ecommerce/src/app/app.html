@@ -1,0 +1,13 @@
+@if (showCustomerChrome()) {
+  <app-header />
+}
+
+<main>
+  <router-outlet />
+</main>
+
+@if (showCustomerChrome() && ui.paneOpen()) {
+  <app-cart-pane (close)="ui.closePane()" />
+}
+
+<app-toast-host />

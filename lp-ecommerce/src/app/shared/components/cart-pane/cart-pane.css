@@ -1,0 +1,104 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 16, 40, 0.4);
+}
+
+.pane {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 420px;
+  max-width: 90vw;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-md);
+  animation: slide-in 0.2s ease;
+}
+@keyframes slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+.pane-head h2 { font-size: 1.3rem; }
+
+.pane-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+.empty {
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: 40px;
+}
+
+.line {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.line-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.line-name { font-weight: 600; font-size: 0.95rem; }
+.line-price { color: var(--color-primary); font-weight: 700; }
+
+.qty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+.step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  font-size: 1rem;
+  line-height: 1;
+}
+.step:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.count { min-width: 18px; text-align: center; font-weight: 600; }
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+.icon-btn.small { font-size: 0.9rem; }
+.icon-btn:hover { color: var(--color-text); }
+
+.pane-foot {
+  padding: 20px 24px;
+  border-top: 1px solid var(--color-border);
+}
+.subtotal {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+.subtotal .amount { font-weight: 700; font-size: 1.15rem; }
+.block { width: 100%; }

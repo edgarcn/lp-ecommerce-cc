@@ -1,0 +1,44 @@
+<section class="container page">
+  <a routerLink="/" class="back">← Back to products</a>
+
+  @if (loading()) {
+    <p class="status">Loading…</p>
+  } @else if (notFound()) {
+    <p class="status">Product not found.</p>
+  } @else if (product(); as p) {
+    <div class="detail">
+      <div class="media">
+        <app-product-image [name]="p.name" [seed]="p.productId" />
+      </div>
+
+      <div class="info">
+        <span class="category">{{ p.category }}</span>
+        <h1 class="name">{{ p.name }}</h1>
+        <span class="price">{{ p.price | currency }}</span>
+
+        @if (p.description) {
+          <p class="description">{{ p.description }}</p>
+        }
+
+        <dl class="specs">
+          <div><dt>SKU</dt><dd>{{ p.sku }}</dd></div>
+          <div><dt>Weight</dt><dd>{{ p.weightKg }} kg</dd></div>
+        </dl>
+
+        @if (p.currentStock > 0) {
+          <div class="purchase">
+            <div class="qty">
+              <button class="step" (click)="decrement()" [disabled]="quantity() <= 1">−</button>
+              <span class="count">{{ quantity() }}</span>
+              <button class="step" (click)="increment()" [disabled]="quantity() >= p.currentStock">+</button>
+            </div>
+            <button class="btn btn-primary" (click)="addToCart()">🛒 Add to Cart</button>
+          </div>
+          <span class="stock-note">{{ p.currentStock }} in stock</span>
+        } @else {
+          <button class="btn btn-primary" disabled>Out of stock</button>
+        }
+      </div>
+    </div>
+  }
+</section>
