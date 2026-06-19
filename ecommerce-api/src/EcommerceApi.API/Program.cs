@@ -9,6 +9,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load user-secrets in every environment (they otherwise load only in
+// Development). On the dev machine this supplies the connection string, JWT
+// secret, and admin hash regardless of ASPNETCORE_ENVIRONMENT. In a container
+// there is no secrets file, so this is a no-op and environment variables apply.
+builder.Configuration.AddUserSecrets<Program>(optional: true);
+
 builder.Services.AddControllers();
 
 // Database
@@ -27,7 +33,14 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<OrderService>();
 
 // JWT Auth
-var jwtSecret = builder.Configuration["Auth:JwtSecret"]!;
+var jwtSecret = builder.Configuration["Auth:JwtSecret"];
+if (string.IsNullOrEmpty(jwtSecret))
+{
+    throw new InvalidOperationException(
+        $"Auth:JwtSecret is not configured (current environment: '{builder.Environment.EnvironmentName}'). " +
+        "For local development set it with: dotnet user-secrets set \"Auth:JwtSecret\" \"<value>\". " +
+        "For production/Docker provide it as the environment variable Auth__JwtSecret.");
+}
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
