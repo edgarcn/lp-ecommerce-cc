@@ -1,0 +1,45 @@
+<div class="head">
+  <h1>Products</h1>
+  <a routerLink="/admin/products/batch" class="btn btn-primary">⬆ Batch Upload</a>
+</div>
+
+@if (loading()) {
+  <p class="admin-status">Loading products…</p>
+} @else if (error()) {
+  <p class="admin-status">Could not load products.</p>
+} @else {
+  <div class="admin-card">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th (click)="sortBy('productId')">ID <span class="si">{{ sortIcon('productId') }}</span></th>
+          <th (click)="sortBy('name')">Name <span class="si">{{ sortIcon('name') }}</span></th>
+          <th (click)="sortBy('price')" class="num">Price <span class="si">{{ sortIcon('price') }}</span></th>
+          <th (click)="sortBy('currentStock')" class="num">Stock <span class="si">{{ sortIcon('currentStock') }}</span></th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of sorted(); track p.productId) {
+          <tr>
+            <td class="muted">#{{ p.productId }}</td>
+            <td>
+              <span class="p-name">{{ p.name }}</span>
+              <span class="p-sku">{{ p.sku }}</span>
+            </td>
+            <td class="num">{{ p.price | currency }}</td>
+            <td class="num">
+              <span [class.low]="p.currentStock === 0">{{ p.currentStock }}</span>
+            </td>
+            <td class="actions-col">
+              <a [routerLink]="['/admin/products', p.productId, 'edit']" class="btn-edit">Edit</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (sorted().length === 0) {
+      <p class="admin-status">No active products. Use Batch Upload to add some.</p>
+    }
+  </div>
+}

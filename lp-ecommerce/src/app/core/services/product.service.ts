@@ -26,4 +26,41 @@ export class ProductService {
   getCategories(): Observable<string[]> {
     return this.http.get<string[]>(`${this.baseUrl}/categories`);
   }
+
+  create(body: ProductWriteRequest): Observable<Product> {
+    return this.http.post<Product>(this.baseUrl, body);
+  }
+
+  update(productId: number, body: ProductUpdateRequest): Observable<Product> {
+    return this.http.put<Product>(`${this.baseUrl}/${productId}`, body);
+  }
+
+  deactivate(productId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${productId}`);
+  }
+
+  batchUpload(file: File): Observable<BatchUploadResult> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<BatchUploadResult>(`${this.baseUrl}/batch-upload`, form);
+  }
+}
+
+export interface ProductWriteRequest {
+  sku: string;
+  name: string;
+  description?: string;
+  category: string;
+  price: number;
+  stock: number;
+  weightKg: number;
+}
+
+export type ProductUpdateRequest = Omit<ProductWriteRequest, 'sku'>;
+
+export interface BatchUploadResult {
+  created: number;
+  updated: number;
+  warnings: string[];
+  errors: string[];
 }

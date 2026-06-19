@@ -149,3 +149,50 @@ button {
   margin: 0 auto;
   padding: 0 24px;
 }
+
+/* ===== Admin shared ===== */
+.admin-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.admin-status {
+  color: var(--color-text-muted);
+  padding: 40px;
+  text-align: center;
+}
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.92rem;
+}
+.admin-table thead th {
+  background: var(--color-surface-alt);
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.admin-table thead th .si {
+  opacity: 0.6;
+  font-size: 0.85rem;
+}
+.admin-table tbody tr:hover {
+  background: var(--color-surface-alt);
+}
+.admin-table .num {
+  text-align: right;
+}
+.admin-table .muted {
+  color: var(--color-text-muted);
+}

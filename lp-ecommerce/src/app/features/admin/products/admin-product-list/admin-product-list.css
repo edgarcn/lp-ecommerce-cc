@@ -1,0 +1,39 @@
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.head h1 {
+  font-size: 1.8rem;
+}
+.p-name {
+  display: block;
+  font-weight: 600;
+}
+.p-sku {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+.low {
+  color: var(--color-danger);
+  font-weight: 700;
+}
+.actions-col {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+.btn-edit {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+.btn-edit:hover {
+  background: #e0d8fd;
+}

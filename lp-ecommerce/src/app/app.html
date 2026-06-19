@@ -1,10 +1,12 @@
-<app-header />
+@if (showCustomerChrome()) {
+  <app-header />
+}
 
 <main>
   <router-outlet />
 </main>
 
-@if (ui.paneOpen()) {
+@if (showCustomerChrome() && ui.paneOpen()) {
   <app-cart-pane (close)="ui.closePane()" />
 }
 

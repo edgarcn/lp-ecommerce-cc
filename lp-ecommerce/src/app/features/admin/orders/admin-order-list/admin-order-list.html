@@ -1,0 +1,67 @@
+<div class="head">
+  <h1>Orders</h1>
+</div>
+
+<div class="filters">
+  <div class="f">
+    <label>Status</label>
+    <select [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+      @for (opt of statusOptions; track opt.label) {
+        <option [ngValue]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="f">
+    <label>Order ID</label>
+    <input type="number" [ngModel]="filterId()" (ngModelChange)="filterId.set($event)" placeholder="e.g. 1" />
+  </div>
+  <div class="f">
+    <label>Customer name</label>
+    <input type="text" [ngModel]="filterName()" (ngModelChange)="filterName.set($event)" placeholder="Search name" />
+  </div>
+  <div class="f">
+    <label>Placed date</label>
+    <input type="date" [ngModel]="filterDate()" (ngModelChange)="filterDate.set($event)" />
+  </div>
+  <button class="btn btn-ghost" (click)="clearFilters()">Clear</button>
+</div>
+
+@if (loading()) {
+  <p class="admin-status">Loading orders…</p>
+} @else if (error()) {
+  <p class="admin-status">Could not load orders.</p>
+} @else {
+  <div class="admin-card">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Placed Date</th>
+          <th>Customer</th>
+          <th class="num">Total</th>
+          <th>Status</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (o of filtered(); track o.orderId) {
+          <tr>
+            <td class="muted">#{{ o.orderId }}</td>
+            <td>{{ o.placedDate | date: 'medium' }}</td>
+            <td>{{ o.customerFirstName }} {{ o.customerLastName }}</td>
+            <td class="num">{{ o.total | currency }}</td>
+            <td>
+              <span class="badge" [class]="'s' + o.orderStatus">{{ statusLabel(o.orderStatus) }}</span>
+            </td>
+            <td class="actions-col">
+              <a [routerLink]="['/admin/orders', o.orderId]" class="btn-view">View</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (filtered().length === 0) {
+      <p class="admin-status">No orders match the current filters.</p>
+    }
+  </div>
+}

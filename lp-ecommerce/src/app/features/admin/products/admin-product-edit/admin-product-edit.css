@@ -1,0 +1,73 @@
+.back {
+  display: inline-block;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.back:hover { color: var(--color-text); }
+
+.edit-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.edit-head h1 { font-size: 1.7rem; }
+.ids { color: var(--color-text-muted); font-size: 0.9rem; }
+
+.edit-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  max-width: 680px;
+}
+
+.readonly-row {
+  display: flex;
+  gap: 40px;
+  padding: 0 0 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+.ro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ro-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+.ro-value { font-weight: 600; }
+.status-active { color: var(--color-success); }
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+.btn-delete {
+  background: #fef2f2;
+  color: var(--color-danger);
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.btn-delete:hover:not(:disabled) { background: #fee2e2; }
+.btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .row { grid-template-columns: 1fr; }
+}
