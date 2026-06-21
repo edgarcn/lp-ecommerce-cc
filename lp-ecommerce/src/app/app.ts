@@ -16,12 +16,17 @@ export class App {
   readonly ui = inject(StorefrontUiService);
   private readonly router = inject(Router);
 
-  // Customer chrome (header + cart) is hidden on admin routes, which have their own shell.
-  readonly showCustomerChrome = signal(!this.router.url.startsWith('/admin'));
+  // Customer chrome (header + cart) is hidden on admin routes (own shell) and
+  // on the full-screen offline page.
+  readonly showCustomerChrome = signal(this.isCustomerRoute(this.router.url));
 
   constructor() {
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-      .subscribe((e) => this.showCustomerChrome.set(!e.urlAfterRedirects.startsWith('/admin')));
+      .subscribe((e) => this.showCustomerChrome.set(this.isCustomerRoute(e.urlAfterRedirects)));
+  }
+
+  private isCustomerRoute(url: string): boolean {
+    return !url.startsWith('/admin') && !url.startsWith('/offline');
   }
 }

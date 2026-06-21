@@ -100,7 +100,9 @@ export class Summary {
         unitSuiteNumber: ship.unitSuiteNumber,
         city: ship.city,
         state: ship.state,
-        zipCode: ship.zipCode,
+        // Coerce to string: the ZIP input may bind as a number, but the API
+        // expects a string.
+        zipCode: String(ship.zipCode ?? ''),
         deliveryInstructions: ship.deliveryInstructions,
       },
       payment: {

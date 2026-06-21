@@ -28,7 +28,7 @@
 
   <div class="field">
     <label>Country / Region <span class="required">*</span></label>
-    <input type="text" formControlName="countryRegion" placeholder="e.g. Mexico" />
+    <input type="text" formControlName="countryRegion" placeholder="e.g. United States" />
     @if (form.get('countryRegion')?.touched && form.get('countryRegion')?.invalid) {
       <span class="error-text">Country / region is required.</span>
     }
@@ -50,7 +50,7 @@
   <div class="row">
     <div class="field">
       <label>City <span class="required">*</span></label>
-      <input type="text" formControlName="city" />
+      <input type="text" maxlength="100" formControlName="city" />
     </div>
     <div class="field">
       <label>State <span class="required">*</span></label>
@@ -58,13 +58,19 @@
     </div>
     <div class="field">
       <label>ZIP Code <span class="required">*</span></label>
-      <input type="text" formControlName="zipCode" />
+      <input
+        type="text"
+        formControlName="zipCode"
+        mask="00000||00000-0000"
+        [dropSpecialCharacters]="false"
+        placeholder="78701"
+      />
     </div>
   </div>
 
   <div class="field">
     <label>Delivery Instructions</label>
-    <textarea formControlName="deliveryInstructions" rows="2"></textarea>
+    <textarea formControlName="deliveryInstructions" rows="3" maxlength=""></textarea>
   </div>
 
   <div class="actions">

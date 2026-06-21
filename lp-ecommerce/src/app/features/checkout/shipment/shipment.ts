@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgxMaskDirective } from 'ngx-mask';
 import { CartService } from '../../../core/services/cart.service';
 import { CheckoutStateService } from '../../../core/services/checkout-state.service';
 
@@ -18,7 +19,7 @@ function emailsMatch(group: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-shipment',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, NgxMaskDirective],
   templateUrl: './shipment.html',
   styleUrl: './shipment.css',
 })

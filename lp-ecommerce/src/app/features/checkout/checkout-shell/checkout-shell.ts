@@ -1,12 +1,12 @@
 import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 import { CartService } from '../../../core/services/cart.service';
 import { StorefrontUiService } from '../../../core/services/storefront-ui.service';
 
 @Component({
   selector: 'app-checkout-shell',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet],
   templateUrl: './checkout-shell.html',
   styleUrl: './checkout-shell.css',
 })
@@ -34,7 +34,7 @@ export class CheckoutShell implements OnDestroy {
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
       .subscribe((e) => this.currentStep.set(this.stepFromUrl(e.urlAfterRedirects)));
   }
-
+  
   private stepFromUrl(url: string): string {
     if (url.includes('payment')) return 'payment';
     if (url.includes('summary')) return 'summary';
