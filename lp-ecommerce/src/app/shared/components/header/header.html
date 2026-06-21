@@ -1,8 +1,8 @@
 <header class="site-header">
   <div class="container bar">
-    <a routerLink="/" class="brand">
+    <a routerLink="/" class="brand" (click)="goHome()">
       <span class="logo">◆</span>
-      <span class="brand-name">Velour</span>
+      <span class="brand-name">LP E-Commerce</span>
     </a>
 
     @if (ui.showSearch()) {
@@ -32,11 +32,16 @@
       <span class="spacer"></span>
     }
 
-    <button class="cart-btn" (click)="ui.openPane()" aria-label="Open cart">
-      <span class="cart-icon">🛒</span>
-      @if (cart.count() > 0) {
-        <span class="badge">{{ cart.count() }}</span>
-      }
-    </button>
+    @if (ui.showSearch()) {
+      <button class="cart-btn" (click)="ui.openPane()" aria-label="Open cart">
+        <span class="cart-icon">🛒</span>
+        @if (cart.count() > 0) {
+          <span class="badge">{{ cart.count() }}</span>
+        }
+      </button>
+    } @else {
+      <span class="spacer"></span>
+    }
+
   </div>
 </header>

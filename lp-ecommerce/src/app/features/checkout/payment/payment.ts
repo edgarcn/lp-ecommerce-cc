@@ -1,11 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgxMaskDirective } from 'ngx-mask';
 import { CheckoutStateService } from '../../../core/services/checkout-state.service';
 
 @Component({
   selector: 'app-payment',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, NgxMaskDirective],
   templateUrl: './payment.html',
   styleUrl: './payment.css',
 })

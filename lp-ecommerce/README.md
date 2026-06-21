@@ -1,4 +1,31 @@
-# LpEcommerce
+# LP E-Commerce — Frontend
+
+Angular 21 storefront + admin site (standalone components, signals). See the
+[solution README](../README.md) for the full business rules.
+
+## Overview
+- **Customer storefront** (public): product list with name/SKU search, category
+  dropdown, and infinite scroll; product detail; local-storage cart with
+  pre-checkout stock revalidation; 3-step checkout (shipment → fake payment →
+  summary) with masked card/expiry/ZIP inputs (Visa/Mastercard + Amex) and a
+  hidden CVV; order-complete screen; and an offline page shown when the API is
+  unreachable.
+- **Admin site** (JWT-guarded `/admin`): login, product list (sortable) + edit +
+  deactivate + CSV batch upload, and order list (filterable, status defaults to
+  Open) + detail with mark-as-delivered.
+
+## Configuration
+- API base URL: `src/environments/environment.ts` (defaults to
+  `http://localhost:5048/api`).
+- Admin login uses the credentials configured in the backend.
+
+## Quick start
+```bash
+npx ng serve      # http://localhost:4200
+```
+The backend API must be running (see [backend README](../ecommerce-api/README.md)).
+
+---
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.11.
 
