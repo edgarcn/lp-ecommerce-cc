@@ -70,7 +70,13 @@ downloaded on **June 14th, 2026**.)
   product/order management endpoints.
 - The admin password is stored as a **BCrypt hash**, verified on login; a **JWT**
   is issued and required by admin endpoints.
+- The JWT is delivered in an **`httpOnly`, `SameSite=Strict` cookie** (not the
+  response body and not `localStorage`), so it is not readable by JavaScript and
+  is hardened against XSS token theft. The browser attaches it automatically; the
+  SPA sends API requests with `withCredentials`. Session state is restored on page
+  load via `GET /api/auth/me`, and `POST /api/auth/logout` clears the cookie.
 - No customer login: customers look up an order with their email + order id.
+- See [Security](#security) for the full hardening notes and production caveats.
 
 ### Internationalization
 - The demo is English-only, but the UI is built to allow future translations.
@@ -115,7 +121,9 @@ downloaded on **June 14th, 2026**.)
 
 | Method | Route | Auth | Purpose |
 |--------|-------|------|---------|
-| POST | `/api/auth/login` | Public | Admin login → JWT |
+| POST | `/api/auth/login` | Public | Admin login → sets `httpOnly` JWT cookie (rate-limited) |
+| GET | `/api/auth/me` | Admin | Restore session from cookie on page load |
+| POST | `/api/auth/logout` | Public | Clear the auth cookie |
 | GET | `/api/products` | Public | Paged list + filters (name, category, sku) |
 | GET | `/api/products/categories` | Public | Distinct active categories |
 | GET | `/api/products/{id}` | Public | Single product |
@@ -128,6 +136,75 @@ downloaded on **June 14th, 2026**.)
 | GET | `/api/orders/{id}` | Admin | Single order |
 | GET | `/api/orders/validate` | Public | Check order exists by id + email |
 | PATCH | `/api/orders/{id}/status` | Admin | Update status (+ shipping when Delivered) |
+
+---
+
+## Security
+
+The app applies several production-minded hardening measures, while deliberately
+**leaving HTTPS enforcement off by default** because of how this challenge is
+meant to be run.
+
+### Deployment context for this challenge
+This is a **technical demo** intended to be built and run with Docker on a
+**local machine over plain HTTP** — there is no public domain and no TLS
+certificate. Containers default to the `Production` environment, which is exactly
+where naive "is this production?" hardening tends to break a local HTTP demo.
+
+### Hardening that is always on
+- **Auth token in an `httpOnly`, `SameSite=Strict` cookie** — not in
+  `localStorage` and not in the response body, so it can't be read by JavaScript
+  (XSS-resistant). `SameSite=Strict` also blocks CSRF for the admin endpoints. On
+  `localhost` the cookie flows across ports because `SameSite`/site keys on the
+  registrable domain and ignores the port.
+- **Security response headers** on every API response: `X-Content-Type-Options:
+  nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy:
+  strict-origin-when-cross-origin`, and `Content-Security-Policy: default-src
+  'none'` (the API serves JSON only).
+- **Login rate limiting** — a fixed window of 10 attempts/minute on
+  `/api/auth/login` to slow brute-force attempts.
+- **CORS allow-list** — only the configured `AllowedOrigins` may call the API,
+  with credentials enabled so the auth cookie is accepted.
+- **Parameterized data access** (EF Core) and **framework auto-escaping**
+  (Angular interpolation) — the malicious sample rows in the test CSV (`<script>`
+  and `'); DROP TABLE`) are stored and rendered as inert plain text.
+- **Secrets via environment variables** in containers — JWT secret, admin BCrypt
+  hash, and DB connection string are never committed.
+
+### Decisions deliberately discarded for the demo (and why)
+These would be correct in real production but **would silently break the local
+HTTP demo**, so they are gated behind a single flag, `Security:RequireHttps`
+(default `false`):
+
+| Measure | Why it's off for the demo |
+|---------|---------------------------|
+| **HTTPS redirect** (`UseHttpsRedirection`) | There is no TLS listener on a local HTTP container; forcing a redirect to `https://` points at a port nothing serves, causing failed/looping requests. |
+| **`Secure` flag on the auth cookie** | A container runs as `Production` by default. With `Secure=true` the browser **silently refuses to store/send the cookie over HTTP** — login would appear to succeed (200) but every admin call would then 401. This is the single most likely thing to break the demo, so the `Secure` flag tracks *“actually served over HTTPS”* (`Security:RequireHttps`), **not** the environment name. |
+| **HSTS** (`Strict-Transport-Security`) | Browsers ignore it over HTTP anyway, and emitting it risks pinning HTTPS-only on a developer's `localhost` if the demo is ever hit once over HTTPS. |
+
+### Recommendations for a real production deployment
+When deploying behind a real domain and TLS, do the following:
+
+1. **Set `Security__RequireHttps=true`** — this turns on the HTTPS redirect, HSTS,
+   and the `Secure` cookie flag in one switch.
+2. **Terminate TLS at a reverse proxy / load balancer** and add
+   `app.UseForwardedHeaders()` (for `X-Forwarded-Proto` and `X-Forwarded-For`) so
+   the app sees the real scheme and client IP. Without this, the HTTPS redirect
+   and any IP-based logic misbehave behind a proxy.
+3. **Partition the login rate limiter by client IP** (instead of the current
+   single global window) so one abusive client can't lock out all admins — this
+   depends on forwarded headers being configured first.
+4. **If the SPA and API are served from different sites** (different registrable
+   domains), change the cookie to `SameSite=None; Secure` — `Strict` would stop
+   the browser from sending the cookie cross-site and break admin auth.
+5. **Tighten CORS** to the exact production origin(s) and consider restricting
+   allowed methods/headers rather than `AllowAnyHeader`/`AllowAnyMethod`.
+6. **Add a global exception handler / ProblemDetails** so unexpected errors never
+   leak internal details, and rotate the JWT secret and admin credentials.
+7. **Use managed secrets** (a vault / orchestrator secret store) rather than
+   plain environment variables, and run migrations as a deliberate deploy step
+   rather than automatically on every container start (avoids multi-replica
+   races).
 
 ---
 
