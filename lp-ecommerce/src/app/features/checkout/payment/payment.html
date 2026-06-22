@@ -25,6 +25,7 @@
       mask="0000 000000 00000||0000 0000 0000 0000"
       placeholder="1234 5678 9012 3456"
       inputmode="numeric"
+      maxlength="20"
     />
     @if (form.get('cardNumber')?.touched && form.get('cardNumber')?.invalid) {
       <span class="error-text">Enter a valid card number.</span>
@@ -33,7 +34,7 @@
 
   <div class="field">
     <label>Name on Card <span class="required">*</span></label>
-    <input type="text" formControlName="cardholderName" />
+    <input type="text" formControlName="cardholderName" maxlength="200" />
     @if (form.get('cardholderName')?.touched && form.get('cardholderName')?.invalid) {
       <span class="error-text">Name on card is required.</span>
     }

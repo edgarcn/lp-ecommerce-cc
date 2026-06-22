@@ -124,6 +124,8 @@ button {
 .field input,
 .field select,
 .field textarea {
+  width: 100%;
+  box-sizing: border-box;
   font-family: inherit;
   font-size: 0.95rem;
   padding: 12px 14px;

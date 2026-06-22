@@ -26,8 +26,8 @@ export class Payment {
   private readonly state = inject(CheckoutStateService);
 
   readonly form = this.fb.group({
-    cardNumber: ['', [Validators.required, Validators.pattern(/^[0-9 ]{13,23}$/)]],
-    cardholderName: ['', Validators.required],
+    cardNumber: ['', [Validators.required, Validators.maxLength(20), Validators.pattern(/^[0-9 ]{13,23}$/)]],
+    cardholderName: ['', [Validators.required, Validators.maxLength(200)]],
     expiry: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/?[0-9]{2}$/), expiryNotExpired]],
     cvv: ['', [Validators.required, Validators.pattern(/^\d{3,4}$/)]],
   });

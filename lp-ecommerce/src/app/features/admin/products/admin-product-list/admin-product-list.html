@@ -1,6 +1,9 @@
 <div class="head">
   <h1>Products</h1>
-  <a routerLink="/admin/products/batch" class="btn btn-primary">⬆ Batch Upload</a>
+  <div class="head-actions">
+    <a routerLink="/admin/products/new" class="btn btn-primary">+ Add Product</a>
+    <a routerLink="/admin/products/batch" class="btn btn-primary">⬆ Batch Upload</a>
+  </div>
 </div>
 
 @if (loading()) {
@@ -8,6 +11,32 @@
 } @else if (error()) {
   <p class="admin-status">Could not load products.</p>
 } @else {
+  <div class="search-bar">
+    <select
+      class="cat"
+      [value]="selectedCategory()"
+      (change)="selectedCategory.set($any($event.target).value)"
+    >
+      <option value="">All categories</option>
+      @for (cat of categories(); track cat) {
+        <option [value]="cat">{{ cat }}</option>
+      }
+    </select>
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input
+        type="text"
+        placeholder="Search by name or SKU…"
+        [value]="term()"
+        (input)="term.set($any($event.target).value)"
+      />
+      @if (term()) {
+        <button class="clear-btn" type="button" (click)="term.set('')">✕</button>
+      }
+    </div>
+    <span class="result-count">{{ sorted().length }} product{{ sorted().length === 1 ? '' : 's' }}</span>
+  </div>
+
   <div class="admin-card">
     <table class="admin-table">
       <thead>
@@ -39,7 +68,9 @@
       </tbody>
     </table>
     @if (sorted().length === 0) {
-      <p class="admin-status">No active products. Use Batch Upload to add some.</p>
+      <p class="admin-status">
+        {{ term() || selectedCategory() ? 'No products match your search.' : 'No active products. Use Batch Upload to add some.' }}
+      </p>
     }
   </div>
 }
