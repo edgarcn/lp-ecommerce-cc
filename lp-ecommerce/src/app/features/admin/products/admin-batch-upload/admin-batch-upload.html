@@ -5,7 +5,7 @@
 
 <div class="upload-card">
   <label class="dropzone">
-    <input type="file" accept=".csv" (change)="onFileSelected($event)" hidden />
+    <input type="file" accept=".csv" (change)="onFileSelected($event)" hidden #fileInput />
     <span class="dz-icon">⬆</span>
     @if (file()) {
       <span class="dz-file">{{ file()!.name }}</span>

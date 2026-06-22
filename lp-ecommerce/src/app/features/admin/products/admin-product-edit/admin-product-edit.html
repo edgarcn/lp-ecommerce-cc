@@ -57,7 +57,7 @@
     </div>
 
     <div class="actions">
-      <button type="button" class="btn-delete" [disabled]="deactivating()" (click)="deactivate()">
+      <button type="button" class="btn-delete" [disabled]="deactivating()" (click)="requestDeactivate()">
         🗑 {{ deactivating() ? 'Deactivating…' : 'Delete (Deactivate)' }}
       </button>
       <button type="submit" class="btn btn-primary" [disabled]="saving()">
@@ -65,4 +65,23 @@
       </button>
     </div>
   </form>
+
+  @if (showDeactivateDialog()) {
+    <div class="dialog-backdrop" (click)="cancelDeactivate()">
+      <div class="dialog" (click)="$event.stopPropagation()">
+        <h2 class="dialog-title">Deactivate product?</h2>
+        <p class="dialog-body">
+          <strong>{{ product()?.name }}</strong> will be removed from the storefront
+          and its <strong>stock will be set to 0</strong>.
+        </p>
+        <p class="dialog-body">
+          If you reactivate this product later via batch upload, stock will need to be replenished.
+        </p>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancelDeactivate()">Cancel</button>
+          <button type="button" class="btn-delete" (click)="confirmDeactivate()">Yes, deactivate</button>
+        </div>
+      </div>
+    </div>
+  }
 }

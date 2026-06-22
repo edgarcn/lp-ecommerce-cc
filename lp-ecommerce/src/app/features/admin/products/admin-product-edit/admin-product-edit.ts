@@ -25,6 +25,7 @@ export class AdminProductEdit {
   readonly notFound = signal(false);
   readonly saving = signal(false);
   readonly deactivating = signal(false);
+  readonly showDeactivateDialog = signal(false);
 
   readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -84,14 +85,23 @@ export class AdminProductEdit {
       });
   }
 
-  deactivate(): void {
+  requestDeactivate(): void {
+    if (!this.product()) return;
+    this.showDeactivateDialog.set(true);
+  }
+
+  cancelDeactivate(): void {
+    this.showDeactivateDialog.set(false);
+  }
+
+  confirmDeactivate(): void {
     const p = this.product();
     if (!p) return;
-    if (!confirm(`Deactivate "${p.name}"? It will be removed from the storefront.`)) return;
+    this.showDeactivateDialog.set(false);
     this.deactivating.set(true);
     this.productService.deactivate(this.productId).subscribe({
       next: () => {
-        this.toast.success(`"${p.name}" deactivated.`);
+        this.toast.success(`"${p.name}" deactivated. Stock set to 0.`);
         this.router.navigate(['/admin/products']);
       },
       error: () => {

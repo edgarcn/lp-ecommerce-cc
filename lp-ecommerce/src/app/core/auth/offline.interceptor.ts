@@ -14,7 +14,8 @@ export const offlineInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status === 0 && req.url.startsWith(environment.apiBaseUrl)) {
+      const isFileUpload = req.body instanceof FormData;
+      if (err.status === 0 && !isFileUpload && req.url.startsWith(environment.apiBaseUrl)) {
         router.navigate(['/offline']);
       }
       return throwError(() => err);
