@@ -82,19 +82,12 @@ export class Summary {
     const ship = this.draft().shipment!;
     const pay = this.draft().payment!;
 
-    // The backend customer requires first + last name, but the form only
-    // captures a single delivery "Full Name". We split it: first token =
-    // first name, the remainder = last name (falling back to the first token).
-    const parts = ship.fullname.trim().split(/\s+/);
-    const firstName = parts[0];
-    const lastName = parts.length > 1 ? parts.slice(1).join(' ') : parts[0];
-
     return {
       customerEmail: ship.email,
-      customerFirstName: firstName,
-      customerLastName: lastName,
+      customerFirstName: ship.firstName,
+      customerLastName: ship.lastName,
       deliveryAddress: {
-        fullname: ship.fullname,
+        fullname: `${ship.firstName} ${ship.lastName}`,
         countryRegion: ship.countryRegion,
         streetAddress: ship.streetAddress,
         unitSuiteNumber: ship.unitSuiteNumber,

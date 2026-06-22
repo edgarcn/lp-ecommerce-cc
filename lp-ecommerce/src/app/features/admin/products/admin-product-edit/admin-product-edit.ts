@@ -27,9 +27,9 @@ export class AdminProductEdit {
   readonly deactivating = signal(false);
 
   readonly form = this.fb.group({
-    name: ['', Validators.required],
+    name: ['', [Validators.required, Validators.maxLength(200)]],
     description: [''],
-    category: ['', Validators.required],
+    category: ['', [Validators.required, Validators.maxLength(100)]],
     price: [0, [Validators.required, Validators.min(0)]],
     stock: [0, [Validators.required, Validators.min(0)]],
     weightKg: [0, [Validators.required, Validators.min(0)]],

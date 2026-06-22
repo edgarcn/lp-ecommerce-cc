@@ -20,18 +20,32 @@ export class AdminProductList {
   readonly error = signal(false);
   private readonly products = signal<Product[]>([]);
 
+  readonly term = signal('');
+  readonly selectedCategory = signal('');
+
   readonly sortKey = signal<SortKey>('productId');
   readonly sortDir = signal<SortDir>('asc');
 
+  readonly categories = computed(() =>
+    [...new Set(this.products().map((p) => p.category))].sort(),
+  );
+
   readonly sorted = computed(() => {
+    const term = this.term().toLowerCase().trim();
+    const cat = this.selectedCategory();
     const key = this.sortKey();
     const dir = this.sortDir() === 'asc' ? 1 : -1;
-    return [...this.products()].sort((a, b) => {
+
+    const filtered = this.products().filter((p) => {
+      if (cat && p.category !== cat) return false;
+      if (term && !p.name.toLowerCase().includes(term) && !p.sku.toLowerCase().includes(term)) return false;
+      return true;
+    });
+
+    return filtered.sort((a, b) => {
       const av = a[key];
       const bv = b[key];
-      if (typeof av === 'string' && typeof bv === 'string') {
-        return av.localeCompare(bv) * dir;
-      }
+      if (typeof av === 'string' && typeof bv === 'string') return av.localeCompare(bv) * dir;
       return ((av as number) - (bv as number)) * dir;
     });
   });

@@ -4,6 +4,7 @@ import {
   ElementRef,
   NgZone,
   OnDestroy,
+  computed,
   effect,
   inject,
   signal,
@@ -34,6 +35,8 @@ export class ProductList implements AfterViewInit, OnDestroy {
   private readonly sentinel = viewChild<ElementRef<HTMLElement>>('sentinel');
   private observer?: IntersectionObserver;
   private readonly onScroll = () => this.checkSentinel();
+
+  readonly pageTitle = computed(() => this.ui.search().category || 'All Products');
 
   readonly products = signal<Product[]>([]);
   readonly total = signal(0);

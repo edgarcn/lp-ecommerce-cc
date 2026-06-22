@@ -18,17 +18,26 @@
     }
   </div>
 
-  <div class="field">
-    <label>Full Name <span class="required">*</span></label>
-    <input type="text" formControlName="fullname" />
-    @if (form.get('fullname')?.touched && form.get('fullname')?.invalid) {
-      <span class="error-text">Full name is required.</span>
-    }
+  <div class="row row-2col">
+    <div class="field">
+      <label>First Name <span class="required">*</span></label>
+      <input type="text" formControlName="firstName" maxlength="100" />
+      @if (form.get('firstName')?.touched && form.get('firstName')?.invalid) {
+        <span class="error-text">First name is required.</span>
+      }
+    </div>
+    <div class="field">
+      <label>Last Name <span class="required">*</span></label>
+      <input type="text" formControlName="lastName" maxlength="100" />
+      @if (form.get('lastName')?.touched && form.get('lastName')?.invalid) {
+        <span class="error-text">Last name is required.</span>
+      }
+    </div>
   </div>
 
   <div class="field">
     <label>Country / Region <span class="required">*</span></label>
-    <input type="text" formControlName="countryRegion" placeholder="e.g. United States" />
+    <input type="text" formControlName="countryRegion" placeholder="e.g. United States" maxlength="100" />
     @if (form.get('countryRegion')?.touched && form.get('countryRegion')?.invalid) {
       <span class="error-text">Country / region is required.</span>
     }
@@ -36,7 +45,7 @@
 
   <div class="field">
     <label>Street Address <span class="required">*</span></label>
-    <input type="text" formControlName="streetAddress" />
+    <input type="text" formControlName="streetAddress" maxlength="300" />
     @if (form.get('streetAddress')?.touched && form.get('streetAddress')?.invalid) {
       <span class="error-text">Street address is required.</span>
     }
@@ -44,7 +53,7 @@
 
   <div class="field">
     <label>Unit / Suite Number</label>
-    <input type="text" formControlName="unitSuiteNumber" />
+    <input type="text" formControlName="unitSuiteNumber" maxlength="100" />
   </div>
 
   <div class="row">
@@ -54,7 +63,7 @@
     </div>
     <div class="field">
       <label>State <span class="required">*</span></label>
-      <input type="text" formControlName="state" />
+      <input type="text" formControlName="state" maxlength="100" />
     </div>
     <div class="field">
       <label>ZIP Code <span class="required">*</span></label>
@@ -70,7 +79,7 @@
 
   <div class="field">
     <label>Delivery Instructions</label>
-    <textarea formControlName="deliveryInstructions" rows="3" maxlength=""></textarea>
+    <textarea formControlName="deliveryInstructions" rows="3" maxlength="300"></textarea>
   </div>
 
   <div class="actions">

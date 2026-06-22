@@ -63,6 +63,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'products/new',
+        loadComponent: () =>
+          import('./features/admin/products/admin-product-new/admin-product-new').then(
+            (m) => m.AdminProductNew,
+          ),
+      },
+      {
         path: 'products/batch',
         loadComponent: () =>
           import('./features/admin/products/admin-batch-upload/admin-batch-upload').then(

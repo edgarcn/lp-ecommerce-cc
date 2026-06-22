@@ -1,0 +1,65 @@
+<a routerLink="/admin/products" class="back">← Back to products</a>
+
+<h1>Add Product</h1>
+
+<form [formGroup]="form" (ngSubmit)="save()" class="edit-card">
+  <div class="field">
+    <label>SKU <span class="required">*</span></label>
+    <input type="text" formControlName="sku" maxlength="50" />
+    @if (form.get('sku')?.touched && form.get('sku')?.invalid) {
+      <span class="error-text">SKU is required (max 50 characters).</span>
+    }
+  </div>
+
+  <div class="field">
+    <label>Name <span class="required">*</span></label>
+    <input type="text" formControlName="name" maxlength="200" />
+    @if (form.get('name')?.touched && form.get('name')?.invalid) {
+      <span class="error-text">Name is required (max 200 characters).</span>
+    }
+  </div>
+
+  <div class="field">
+    <label>Description</label>
+    <textarea formControlName="description" rows="3" maxlength="2500"></textarea>
+  </div>
+
+  <div class="field">
+    <label>Category <span class="required">*</span></label>
+    <input type="text" formControlName="category" maxlength="100" />
+    @if (form.get('category')?.touched && form.get('category')?.invalid) {
+      <span class="error-text">Category is required (max 100 characters).</span>
+    }
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label>Price (USD) <span class="required">*</span></label>
+      <input type="number" formControlName="price" min="0" step="0.01" />
+      @if (form.get('price')?.touched && form.get('price')?.errors?.['min']) {
+        <span class="error-text">Price cannot be negative.</span>
+      }
+    </div>
+    <div class="field">
+      <label>Stock <span class="required">*</span></label>
+      <input type="number" formControlName="stock" min="0" step="1" />
+      @if (form.get('stock')?.touched && form.get('stock')?.errors?.['min']) {
+        <span class="error-text">Stock cannot be negative.</span>
+      }
+    </div>
+    <div class="field">
+      <label>Weight (kg) <span class="required">*</span></label>
+      <input type="number" formControlName="weightKg" min="0" step="0.01" />
+      @if (form.get('weightKg')?.touched && form.get('weightKg')?.errors?.['min']) {
+        <span class="error-text">Weight cannot be negative.</span>
+      }
+    </div>
+  </div>
+
+  <div class="actions">
+    <a routerLink="/admin/products" class="btn btn-ghost">Cancel</a>
+    <button type="submit" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : 'Create Product' }}
+    </button>
+  </div>
+</form>

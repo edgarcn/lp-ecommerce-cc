@@ -49,6 +49,7 @@
   grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
 }
+.row > * { min-width: 0; }
 
 .actions {
   display: flex;

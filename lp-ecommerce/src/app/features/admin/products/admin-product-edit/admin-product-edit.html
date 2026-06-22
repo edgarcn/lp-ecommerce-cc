@@ -28,17 +28,17 @@
 
     <div class="field">
       <label>Name <span class="required">*</span></label>
-      <input type="text" formControlName="name" />
+      <input type="text" formControlName="name" maxlength="200" />
     </div>
 
     <div class="field">
       <label>Description</label>
-      <textarea formControlName="description" rows="3"></textarea>
+      <textarea formControlName="description" rows="3" maxlength="2500"></textarea>
     </div>
 
     <div class="field">
       <label>Category <span class="required">*</span></label>
-      <input type="text" formControlName="category" />
+      <input type="text" formControlName="category" maxlength="100" />
     </div>
 
     <div class="row">
