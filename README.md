@@ -410,6 +410,20 @@ docker compose up -d --build
 
 Then open **http://localhost:8080**. That's it.
 
+### Accessing the app
+
+Everything is served from `http://localhost:8080`:
+
+| Site | URL | Access |
+|------|-----|--------|
+| **Customer storefront** | [http://localhost:8080/](http://localhost:8080/) | Public — browse, search, add to cart, and check out |
+| **Track an order** | [http://localhost:8080/track-order](http://localhost:8080/track-order) | Public — look up a placed order by email + order number |
+| **Admin site** | [http://localhost:8080/admin](http://localhost:8080/admin) | Requires admin login (redirects to `/admin/login`) |
+
+Log in to the admin site with the credentials from `.env` — `AUTH_ADMIN_USERNAME`
+(default `admin`) and the password matching `AUTH_ADMIN_PASSWORD_HASH`. See
+[Setting your own admin password](#setting-your-own-admin-password) to use your own.
+
 ### What comes up
 
 | Service | Image / build | Host port | Notes |
