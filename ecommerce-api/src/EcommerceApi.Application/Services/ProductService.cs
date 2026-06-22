@@ -74,6 +74,7 @@ public class ProductService(IProductRepository repo)
             return (false, "Product not found.");
 
         product.Active = false;
+        product.CurrentStock = 0;
         await repo.UpdateAsync(product);
         await repo.SaveChangesAsync();
         return (true, null);
@@ -130,9 +131,17 @@ public class ProductService(IProductRepository repo)
             if (existingProducts.TryGetValue(sku, out var existing))
             {
                 existing.CurrentStock += skuRows.Sum(r => r.Stock);
+                if (!existing.Active)
+                {
+                    existing.Active = true;
+                    warnings.Add($"SKU '{sku}' was previously deactivated and has been reactivated. Stock updated to {existing.CurrentStock}.");
+                }
+                else
+                {
+                    warnings.Add($"SKU '{sku}' already exists in the database. Stock updated to {existing.CurrentStock}.");
+                }
                 await repo.UpdateAsync(existing);
                 updated++;
-                warnings.Add($"SKU '{sku}' already exists in the database. Stock updated to {existing.CurrentStock}.");
             }
             else
             {
@@ -199,6 +208,10 @@ public class ProductService(IProductRepository repo)
         if (string.IsNullOrWhiteSpace(row.Name)) return (null, $"Line {line}: 'name' is required.");
         if (string.IsNullOrWhiteSpace(row.Sku)) return (null, $"Line {line}: 'sku' is required.");
         if (string.IsNullOrWhiteSpace(row.Category)) return (null, $"Line {line}: 'category' is required.");
+
+        if (row.Name.Trim().Length > 200) return (null, $"Line {line}: 'name' exceeds 200 characters (got {row.Name.Trim().Length}).");
+        if (row.Sku.Trim().Length > 50) return (null, $"Line {line}: 'sku' exceeds 50 characters (got {row.Sku.Trim().Length}).");
+        if (row.Category.Trim().Length > 100) return (null, $"Line {line}: 'category' exceeds 100 characters (got {row.Category.Trim().Length}).");
 
         var rawPrice = (row.Price ?? string.Empty).Trim().TrimStart('$').Trim();
         if (string.Equals(rawPrice, "free", StringComparison.OrdinalIgnoreCase))
