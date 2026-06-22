@@ -6,11 +6,11 @@ import { CheckoutStateService } from '../../../core/services/checkout-state.serv
 
 function expiryNotExpired(control: AbstractControl): ValidationErrors | null {
   const value = (control.value ?? '').replace('/', '');
-  if (value.length < 4) return null; // let format validator handle incomplete input
+  if (value.length < 4) return null;
   const month = parseInt(value.slice(0, 2), 10);
   const year = 2000 + parseInt(value.slice(2, 4), 10);
   const now = new Date();
-  const expiry = new Date(year, month, 1); // first day of the month AFTER expiry month
+  const expiry = new Date(year, month, 1);
   return expiry <= now ? { cardExpired: true } : null;
 }
 
@@ -32,7 +32,6 @@ export class Payment {
     cvv: ['', [Validators.required, Validators.pattern(/^\d{3,4}$/)]],
   });
 
-  // Live preview values
   readonly cardNumber = signal('');
   readonly cardholderName = signal('');
   readonly expiry = signal('');
@@ -70,7 +69,6 @@ export class Payment {
       return;
     }
     const v = this.form.getRawValue();
-    // CVV is intentionally NOT stored, even in the in-memory draft.
     this.state.setPayment({
       cardNumber: v.cardNumber!,
       cardholderName: v.cardholderName!,

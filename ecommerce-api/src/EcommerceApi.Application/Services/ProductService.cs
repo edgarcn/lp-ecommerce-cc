@@ -10,7 +10,7 @@ namespace EcommerceApi.Application.Services;
 
 public class ProductService(IProductRepository repo)
 {
-    private const int MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+    private const int MaxFileSizeBytes = 5 * 1024 * 1024;
 
     public async Task<PagedResult<ProductDto>> GetPagedAsync(
         string? name, string? category, string? sku, int page, int pageSize)
@@ -92,7 +92,6 @@ public class ProductService(IProductRepository repo)
         }
         catch (Exception ex)
         {
-            // Structural failure (missing header columns, unreadable file): hard-fail.
             return new BatchUploadResult(0, 0, [], [$"The file could not be read: {ex.Message}"]);
         }
 
@@ -100,12 +99,10 @@ public class ProductService(IProductRepository repo)
         var errors = new List<string>();
         int created = 0, updated = 0;
 
-        // Validate and parse every row first. All-or-nothing: if any row has a
-        // problem, import nothing and return the full list of rows to fix.
         var grouped = new Dictionary<string, List<ParsedProductRow>>(StringComparer.OrdinalIgnoreCase);
         foreach (var (row, lineNumber) in rows)
         {
-            if (IsBlankRow(row)) continue; // skip fully-empty lines (trailing blanks)
+            if (IsBlankRow(row)) continue;
 
             var (parsed, error) = ValidateAndParse(row, lineNumber);
             if (error is not null) { errors.Add(error); continue; }
@@ -168,8 +165,6 @@ public class ProductService(IProductRepository repo)
         return new BatchUploadResult(created, updated, warnings, errors);
     }
 
-    // Reads every field as a raw string so malformed values produce clean,
-    // user-friendly messages in ValidateAndParse instead of CsvHelper type-converter dumps.
     private static List<(CsvProductRow Row, int Line)> ParseCsv(Stream stream)
     {
         var results = new List<(CsvProductRow, int)>();

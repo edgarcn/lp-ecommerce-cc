@@ -42,7 +42,6 @@ export class Summary {
   async complete(): Promise<void> {
     this.placing.set(true);
     try {
-      // Final stock validation right before placing the order.
       const adjustments = await this.cart.validateStock();
       for (const adj of adjustments) {
         if (adj.type === 'removed') {
@@ -93,8 +92,6 @@ export class Summary {
         unitSuiteNumber: ship.unitSuiteNumber,
         city: ship.city,
         state: ship.state,
-        // Coerce to string: the ZIP input may bind as a number, but the API
-        // expects a string.
         zipCode: String(ship.zipCode ?? ''),
         deliveryInstructions: ship.deliveryInstructions,
       },

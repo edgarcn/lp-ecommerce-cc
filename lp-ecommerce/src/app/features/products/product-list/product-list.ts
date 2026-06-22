@@ -18,7 +18,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ProductCard } from '../../../shared/components/product-card/product-card';
 
 const PAGE_SIZE = 12;
-const PREFETCH_PX = 300; // start loading when the sentinel is within this distance of the viewport
+const PREFETCH_PX = 300;
 
 @Component({
   selector: 'app-product-list',
@@ -40,8 +40,8 @@ export class ProductList implements AfterViewInit, OnDestroy {
 
   readonly products = signal<Product[]>([]);
   readonly total = signal(0);
-  readonly loading = signal(false); // first page / new search
-  readonly loadingMore = signal(false); // subsequent pages
+  readonly loading = signal(false);
+  readonly loadingMore = signal(false);
 
   private page = 1;
   private nameTotalPages = 1;
@@ -52,7 +52,6 @@ export class ProductList implements AfterViewInit, OnDestroy {
     this.ui.setShowSearch(true);
     this.loadCategories();
 
-    // Restart the list whenever the header search criteria changes.
     effect(() => {
       const criteria = this.ui.search();
       untracked(() => this.startSearch(criteria.term, criteria.category));
@@ -60,8 +59,6 @@ export class ProductList implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // Primary trigger: scroll/resize position check (works everywhere, incl.
-    // headless preview). IntersectionObserver is added as an efficient fast path.
     this.zone.runOutsideAngular(() => {
       window.addEventListener('scroll', this.onScroll, { passive: true });
       window.addEventListener('resize', this.onScroll, { passive: true });
@@ -106,7 +103,6 @@ export class ProductList implements AfterViewInit, OnDestroy {
       .subscribe({
         next: (byName) => {
           this.nameTotalPages = byName.totalPages;
-          // On a fresh search with a term, also surface an exact SKU match.
           if (term) {
             this.productService
               .list({ sku: term, category: category || undefined, page: 1, pageSize: PAGE_SIZE })
@@ -164,7 +160,6 @@ export class ProductList implements AfterViewInit, OnDestroy {
       });
   }
 
-  /** Loads the next page if the sentinel sits within PREFETCH_PX of the viewport. */
   private checkSentinel(): void {
     if (this.page >= this.nameTotalPages || this.loading() || this.loadingMore()) return;
     const el = this.sentinel()?.nativeElement;
@@ -175,11 +170,6 @@ export class ProductList implements AfterViewInit, OnDestroy {
     }
   }
 
-  /**
-   * After a page renders, if the sentinel is still near the viewport (page too
-   * short to scroll) and more pages remain, keep loading. Deferred so the
-   * just-rendered cards update layout before we re-measure.
-   */
   private fillIfNeeded(): void {
     if (this.page < this.nameTotalPages) {
       setTimeout(() => this.checkSentinel(), 0);

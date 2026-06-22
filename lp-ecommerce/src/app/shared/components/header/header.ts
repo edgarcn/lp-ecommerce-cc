@@ -6,7 +6,7 @@ import { StorefrontUiService } from '../../../core/services/storefront-ui.servic
 
 export interface SearchCriteria {
   term: string;
-  category: string; // '' = All
+  category: string;
 }
 
 @Component({
@@ -25,8 +25,6 @@ export class Header {
 
   onSubmit(): void {
     this.ui.setSearch({ term: this.term().trim(), category: this.category() });
-    // Searching from anywhere (e.g. a product detail page) takes the customer
-    // to the product list, which reacts to the search criteria.
     this.router.navigate(['/']);
   }
 
@@ -35,7 +33,6 @@ export class Header {
     this.onSubmit();
   }
 
-  /** Clicking the logo returns to the main product page with a cleared search. */
   goHome(): void {
     this.term.set('');
     this.category.set('');

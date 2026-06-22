@@ -16,8 +16,6 @@ export class App {
   readonly ui = inject(StorefrontUiService);
   private readonly router = inject(Router);
 
-  // Customer chrome (header + cart) is hidden on admin routes (own shell) and
-  // on the full-screen offline page.
   readonly showCustomerChrome = signal(this.isCustomerRoute(this.router.url));
 
   constructor() {

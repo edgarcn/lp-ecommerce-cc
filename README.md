@@ -10,9 +10,174 @@ containers.
 | Backend API | .NET (layered, repository pattern) + EF Core | [`ecommerce-api/`](ecommerce-api) |
 | Datastore | MySQL | (via EF Core migrations) |
 
-See each project's own README for build/run details:
-- [Backend README](ecommerce-api/README.md)
-- [Frontend README](lp-ecommerce/README.md)
+Documentation is consolidated in this root README. Build/run steps are under
+[Running with Docker](#running-with-docker-recommended) and
+[Running locally](#running-locally-without-docker).
+
+## Contents
+
+- [Architecture](#architecture)
+- [Decisions, approach & alternatives considered](#decisions-approach--alternatives-considered)
+- [Scope & business rules](#scope--business-rules)
+- [UI modules](#ui-modules)
+- [API endpoints (summary)](#api-endpoints-summary)
+- [Security](#security)
+- [Running with Docker (recommended)](#running-with-docker-recommended)
+- [Running locally (without Docker)](#running-locally-without-docker)
+
+---
+
+## Architecture
+
+Three containers share a single Docker Compose network. The browser talks only to
+nginx (the `web` container), which serves the Angular bundle and reverse-proxies
+`/api` to the API container — so the SPA and API live on one origin (no CORS, and
+the `httpOnly` auth cookie just works).
+
+```mermaid
+flowchart LR
+    browser["Browser"]
+    subgraph Docker Compose network
+        web["web — nginx + Angular SPA<br/>(lp-ecommerce)"]
+        api["api — .NET 10 Web API<br/>(EcommerceApi)"]
+        db[("db — MySQL 8<br/>(ecommerce_db)")]
+    end
+    browser -->|"http://localhost:8080"| web
+    web -->|"/api → reverse proxy (same origin)"| api
+    api -->|"EF Core · migrations on startup"| db
+```
+
+### Domain model
+
+The order aggregate owns its delivery address, payment, optional shipping info,
+and lines; a line references a product. Payment keeps only safe card metadata.
+
+```mermaid
+classDiagram
+    class Product {
+        +int ProductId
+        +string Sku
+        +string Name
+        +string Description
+        +string Category
+        +decimal Price
+        +string Currency
+        +int CurrentStock
+        +decimal WeightKg
+        +bool Active
+    }
+    class Customer {
+        +int CustomerId
+        +string Email
+        +string FirstName
+        +string LastName
+        +bool Active
+    }
+    class Order {
+        +int OrderId
+        +DateTime PlacedDate
+        +int CustomerId
+        +OrderStatus OrderStatus
+    }
+    class OrderLine {
+        +long OrderLineId
+        +int OrderId
+        +int ProductId
+        +int Quantity
+        +decimal BasePrice
+        +decimal Discount
+        +decimal TotalLine
+    }
+    class DeliveryAddress {
+        +int OrderId
+        +string Fullname
+        +string CountryRegion
+        +string StreetAddress
+        +string UnitSuiteNumber
+        +string City
+        +string State
+        +string ZipCode
+        +string DeliveryInstructions
+    }
+    class OrderPayment {
+        +int OrderId
+        +PaymentMethod Method
+        +PaymentStatus Status
+        +string CardBrand
+        +string CardLast4
+        +string CardholderName
+        +decimal AmountPaid
+        +string Currency
+        +string TransactionReference
+        +DateTime ProcessedAt
+    }
+    class OrderShippingInfo {
+        +int OrderId
+        +string ShippingServiceName
+        +string TrackingNumber
+    }
+    class OrderStatus {
+        <<enumeration>>
+        Open
+        Cancelled
+        Delivered
+    }
+    class PaymentMethod {
+        <<enumeration>>
+        Card
+        PayPal
+    }
+    class PaymentStatus {
+        <<enumeration>>
+        Approved
+        Declined
+        Pending
+    }
+
+    Customer "1" --> "0..*" Order
+    Order "1" --> "1..*" OrderLine
+    Order "1" --> "1" DeliveryAddress
+    Order "1" --> "1" OrderPayment
+    Order "1" --> "0..1" OrderShippingInfo
+    OrderLine "*" --> "1" Product
+    Order ..> OrderStatus
+    OrderPayment ..> PaymentMethod
+    OrderPayment ..> PaymentStatus
+```
+
+---
+
+## Decisions, approach & alternatives considered
+
+The requirements are intentionally open, so the guiding goal was a **small but
+realistic vertical slice**: model the domain properly, keep each feature to the
+simplest version that is still production-shaped, and leave clear seams where a
+fuller implementation would slot in. Work was done decision-first and
+incrementally — each rule below was a deliberate scoping choice, with the heavier
+alternative noted and consciously deferred rather than missed.
+
+| Area | Decision | Alternative considered (deferred) |
+|------|----------|-----------------------------------|
+| Solution shape | Layered .NET API (Domain / Application / Infrastructure / API) with the repository pattern + Angular SPA + MySQL | A single minimal-API project — rejected to keep boundaries explicit and testable |
+| Container topology | Single origin: nginx serves the SPA and proxies `/api` to the API | Exposing the API on its own origin and calling it cross-site — avoided (CORS + cross-site-cookie complexity) |
+| Stock tracking | One integer count on `Product` | An inventory-movement ledger (history, reporting) — out of scope |
+| Currency | USD only, with a `Currency` field reserved on the model | Full multi-currency pricing — deferred; the field leaves the door open |
+| Categories | Free-text field on `Product`; a distinct list is exposed for filtering | A dedicated category catalog/entity — deferred; fine for a small catalog |
+| Customer | Minimal record keyed by **email**; delivery address captured per order | Customer accounts + saved-address profiles — no profile module in scope |
+| Payments | Fake gateway that always approves; persist only **safe metadata** (brand, last 4, cardholder, amount, txn ref, timestamp) | A real/sandbox provider — unnecessary; instead modeled PCI-aware storage (never persist PAN / CVV / expiry) |
+| Shipment cost | Not calculated | Deriving cost from weight × quantity × destination — deferred to keep the order model simple |
+| Batch import — large files | Hard file-size cap | A background/async pipeline for large uploads — out of scope |
+| Batch import — atomicity | **All-or-nothing**: any invalid row aborts the import and returns every problem row | Importing valid rows and skipping bad ones — rejected (decided during development) for predictable, reviewable uploads |
+| Free products | Price `0.00` only; the literal word `free` is rejected | Accepting `free` as zero — rejected for consistency and less parsing ambiguity |
+| Order identity & lifecycle | `OrderId` is the customer-facing number; statuses `Open` / `Cancelled` / `Delivered` | A separate opaque public order code — deferred (kept simple) |
+| Order edits | Customers place + track only; **cancellation is admin-only** and restores stock for active products | Customer self-service cancel/edit — out of scope |
+| Order tracking view | Public lookup returns a **privacy-minimal** projection (no full address/payment) | Returning the full order — rejected (PII exposure + order-number enumeration) |
+| Auth | One admin user; BCrypt hash supplied via env vars/secrets (never committed); JWT in an `httpOnly`, `SameSite=Strict` cookie | JWT in `localStorage` / a full identity system — rejected (XSS exposure / out of scope). See [Security](#security) |
+| Internationalization | English-only, UI structured for future translation | Full localization now — deferred |
+
+The detailed, current behavior for each area is in [Scope & business rules](#scope--business-rules)
+below; the security trade-offs (and what to change for real production) are in
+[Security](#security).
 
 ---
 
@@ -233,11 +398,108 @@ When deploying behind a real domain and TLS, do the following:
 
 ---
 
-## Running locally
+## Running with Docker (recommended)
+
+The whole stack runs with Docker Compose: a MySQL 8 database, the .NET API, and
+the Angular app served by nginx. **Prerequisite:** Docker Desktop running.
+
+```bash
+cp .env.example .env      # demo secrets — works out of the box
+docker compose up -d --build
+```
+
+Then open **http://localhost:8080**. That's it.
+
+### What comes up
+
+| Service | Image / build | Host port | Notes |
+|---------|---------------|-----------|-------|
+| `web`   | nginx + built Angular | **8080 → 80** | Serves the SPA and reverse-proxies `/api` to the API |
+| `api`   | .NET 10 (multi-stage) | not exposed | Listens on `:8080` inside the network; EF Core migrations run on startup |
+| `db`    | `mysql:8` | **3307 → 3306** | 3307 avoids clashing with a local MySQL on 3306; data persists in the `db-data` volume |
+
+**Single-origin by design:** the SPA and API share the `http://localhost:8080`
+origin (nginx proxies `/api`), so there's no CORS and the `httpOnly`/`SameSite=Strict`
+auth cookie works without any cross-site handling. HTTPS hardening stays off for
+this HTTP demo (see [Security](#security)).
+
+### Configuration (`.env`)
+
+Compose reads `.env` automatically. Defaults in `.env.example` are working demo
+values; override for any real deployment.
+
+| Variable | Purpose |
+|----------|---------|
+| `MYSQL_ROOT_PASSWORD` | MySQL root password (used by the healthcheck) |
+| `MYSQL_DATABASE` | Database created on first run (`ecommerce_db`) |
+| `MYSQL_USER` / `MYSQL_PASSWORD` | App DB account; injected into the API connection string |
+| `AUTH_JWT_SECRET` | HMAC-SHA256 signing key (≥ 32 chars) |
+| `AUTH_ADMIN_USERNAME` | Admin login username |
+| `AUTH_ADMIN_PASSWORD_HASH` | BCrypt hash of the admin password — **each `$` must be doubled to `$$`** to escape Compose interpolation; the container receives the correct single-`$` hash |
+| `WEB_ORIGIN` | SPA origin added to the API CORS allow-list |
+
+### Setting your own admin password
+
+The admin password is stored only as a **BCrypt hash** (work factor 11), verified
+on login. To use your own password:
+
+**1. Generate a hash.** With the .NET 10 SDK, create `genhash.cs`:
+
+```csharp
+#:package BCrypt.Net-Next@4.2.0
+Console.WriteLine(BCrypt.Net.BCrypt.HashPassword(args[0], 11));
+```
+
+```bash
+dotnet run genhash.cs -- 'YourNewPassword'
+# → $2a$11$Xpz...
+```
+
+No .NET SDK? Either of these produces a compatible hash:
+
+```bash
+htpasswd -bnBC 11 "" 'YourNewPassword' | tr -d ':\n'                      # apache2-utils
+python -c "import bcrypt; print(bcrypt.hashpw(b'YourNewPassword', bcrypt.gensalt(11)).decode())"
+```
+
+**2. Put it in `.env` with every `$` doubled to `$$`** (Compose interpolation escaping):
+
+```dotenv
+AUTH_ADMIN_USERNAME=admin
+AUTH_ADMIN_PASSWORD_HASH=$$2a$$11$$Xpz...
+```
+
+**3. Recreate the API container** to pick up the new value (no rebuild needed):
+
+```bash
+docker compose up -d
+```
+
+Log in with `AUTH_ADMIN_USERNAME` and the plaintext password you hashed.
+
+> The `$$` doubling applies **only** to `.env`. For a non-Docker run (user-secrets
+> or `appsettings.Development.json`), use the raw single-`$` hash as
+> `Auth:AdminPasswordHash`.
+
+### Common operations
+
+```bash
+docker compose logs -f api      # follow API logs (migrations, requests)
+docker compose down             # stop and remove containers (keeps the db volume)
+docker compose down -v          # also drop the database volume (fresh DB next up)
+```
+
+The catalog/orders can also be reset without tearing down the volume using
+[`ecommerce-api/scripts/truncate-tables.sql`](ecommerce-api/scripts/truncate-tables.sql)
+against the DB on host port **3307**.
+
+---
+
+## Running locally (without Docker)
 
 1. **Database** — a MySQL instance reachable on `localhost:3306` with a database
-   and user (see [backend README](ecommerce-api/README.md) for the connection
-   string and secrets).
+   and user. Provide the connection string and secrets via .NET user-secrets
+   (`Auth:JwtSecret`, `Auth:AdminPasswordHash`, `ConnectionStrings:DefaultConnection`).
 2. **Backend** — from `ecommerce-api`, run the API (defaults to
    `http://localhost:5048`); EF Core migrations are applied on startup.
 3. **Frontend** — from `lp-ecommerce`, run `npx ng serve` (serves

@@ -7,13 +7,10 @@ import { environment } from '../../../environments/environment';
 export class AuthService {
   private readonly http = inject(HttpClient);
 
-  // Tracks whether the admin is authenticated in memory only.
-  // The actual credential is the httpOnly cookie managed by the browser.
   private readonly _authenticated = signal(false);
 
   readonly isAuthenticated = this._authenticated.asReadonly();
 
-  /** Called once at app startup to restore session from an existing cookie. */
   checkSession(): Observable<void> {
     return this.http
       .get(`${environment.apiBaseUrl}/auth/me`, { withCredentials: true })
