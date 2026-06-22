@@ -41,6 +41,11 @@ export const routes: Routes = [
       import('./features/checkout/order-complete/order-complete').then((m) => m.OrderComplete),
   },
   {
+    path: 'track-order',
+    loadComponent: () =>
+      import('./features/order-lookup/order-lookup').then((m) => m.OrderLookup),
+  },
+  {
     path: 'offline',
     loadComponent: () => import('./features/offline/offline').then((m) => m.Offline),
   },

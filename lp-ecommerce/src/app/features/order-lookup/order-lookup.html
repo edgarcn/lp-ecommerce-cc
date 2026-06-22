@@ -1,0 +1,79 @@
+<div class="lookup-wrap">
+  <h1>Track Your Order</h1>
+  <p class="subtitle">Enter the email you used at checkout and your order number to see its status.</p>
+
+  <form [formGroup]="form" (ngSubmit)="search()" class="lookup-form">
+    <div class="field">
+      <label>Email <span class="required">*</span></label>
+      <input type="email" formControlName="email" maxlength="254" placeholder="you@example.com" />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <span class="error-text">Enter a valid email address.</span>
+      }
+    </div>
+    <div class="field">
+      <label>Order Number <span class="required">*</span></label>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" formControlName="orderId" placeholder="e.g. 1024" />
+      @if (form.controls.orderId.touched && form.controls.orderId.invalid) {
+        <span class="error-text">Enter your numeric order number.</span>
+      }
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="searching()">
+      {{ searching() ? 'Searching…' : 'Find Order' }}
+    </button>
+  </form>
+
+  @if (notFound()) {
+    <div class="msg-block error">
+      <p>No order found for that email and order number. Please double-check both and try again.</p>
+    </div>
+  }
+
+  @if (order(); as o) {
+    <div class="order-view">
+      <div class="view-head">
+        <div>
+          <h2>Order #{{ o.orderId }}</h2>
+          <span class="placed">Placed {{ o.placedDate | date: 'medium' }}</span>
+        </div>
+        <span class="badge" [class]="'s' + o.orderStatus">{{ statusLabel(o.orderStatus) }}</span>
+      </div>
+
+      <p class="greeting">Hi {{ o.customerFirstName }}, here's the latest on your order.</p>
+
+      <div class="cards">
+        <div class="info-card">
+          <h3>Shipping To</h3>
+          <p class="muted">{{ o.shipToCity }}, {{ o.shipToState }}<br />{{ o.shipToCountryRegion }}</p>
+        </div>
+        <div class="info-card">
+          <h3>Delivery</h3>
+          @if (o.shippingInfo; as s) {
+            <p class="name">{{ s.shippingServiceName }}</p>
+            <p class="muted">Tracking: {{ s.trackingNumber }}</p>
+          } @else if (o.orderStatus === OrderStatus.Cancelled) {
+            <p class="muted">This order was cancelled.</p>
+          } @else {
+            <p class="muted">Your order is being prepared. Tracking details will appear here once it ships.</p>
+          }
+        </div>
+      </div>
+
+      <div class="items">
+        <div class="items-head">ITEMS</div>
+        @for (line of o.orderLines; track line.orderLineId) {
+          <div class="item">
+            <div class="item-info">
+              <span class="item-name">{{ line.productName }}</span>
+              <span class="muted">{{ line.productSku }} · Qty {{ line.quantity }}</span>
+            </div>
+            <span class="item-price">{{ line.totalLine | currency }}</span>
+          </div>
+        }
+        <div class="total-row">
+          <span>Total</span>
+          <span class="total-amount">{{ o.total | currency }}</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

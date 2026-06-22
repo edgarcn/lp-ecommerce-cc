@@ -24,6 +24,8 @@ export class AdminOrderDetail {
   readonly loading = signal(true);
   readonly notFound = signal(false);
   readonly saving = signal(false);
+  readonly cancelling = signal(false);
+  readonly showCancelDialog = signal(false);
 
   readonly OrderStatus = OrderStatus;
 
@@ -72,6 +74,33 @@ export class AdminOrderDetail {
           this.saving.set(false);
         },
       });
+  }
+
+  requestCancel(): void {
+    if (!this.order()) return;
+    this.showCancelDialog.set(true);
+  }
+
+  dismissCancel(): void {
+    this.showCancelDialog.set(false);
+  }
+
+  confirmCancel(): void {
+    const o = this.order();
+    if (!o) return;
+    this.showCancelDialog.set(false);
+    this.cancelling.set(true);
+    this.orderService.updateStatus(this.orderId, OrderStatus.Cancelled).subscribe({
+      next: (updated) => {
+        this.order.set(updated);
+        this.toast.success('Order cancelled. In-stock items were returned to inventory.');
+        this.cancelling.set(false);
+      },
+      error: (err) => {
+        this.toast.error(err?.error?.message ?? 'Could not cancel the order.');
+        this.cancelling.set(false);
+      },
+    });
   }
 
   statusLabel(status: OrderStatus): string {

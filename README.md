@@ -44,9 +44,15 @@ downloaded on **June 14th, 2026**.)
   are skipped.
 - **Price cleaning**: a leading `$` is stripped (e.g. `$29.99` → `29.99`).
   Thousands separators are intentionally not handled.
+- **Field length limits** are enforced per row to match the DTO constraints:
+  `sku` ≤ 50, `name` ≤ 200, `category` ≤ 100 characters. A violation fails the
+  whole upload (all-or-nothing) with the offending line reported.
 - **Duplicate SKUs**:
   - If the SKU already exists in the DB, its stock is increased by the values in
     the file (with a message to the user).
+  - If a matching product was **previously deactivated**, the upload **reactivates**
+    it and emits a distinct warning so the admin knows a soft-deleted product is
+    live again.
   - If the SKU is new but repeated within the file, the product is created from
     the first occurrence and stock is accumulated across the repeats.
 
@@ -64,6 +70,11 @@ downloaded on **June 14th, 2026**.)
 - **Order status**: `Open` (1), `Cancelled` (2), `Delivered` (3). The
   order id is the identifier shared with the customer. Customers can place and
   look up orders but **cannot cancel or edit** them.
+- **Cancellation is admin-only** and allowed only from the `Open` state (a
+  `Delivered` or `Cancelled` order can no longer change). Cancelling **returns the
+  ordered quantities to inventory**, except for lines whose product is now
+  **inactive** (soft-deleted) — those are skipped, since a deactivated product's
+  stock is intentionally pinned at 0.
 
 ### Authentication
 - A single **admin user** (username + password) guards the admin pages and the
@@ -102,18 +113,31 @@ downloaded on **June 14th, 2026**.)
   emptied after a completed order. Card number, expiry, and ZIP use input masks;
   CVV is a hidden (password) field. Card masks support Visa/Mastercard (16-digit)
   and **Amex (15-digit)**.
+- **Track order** — a public **"Track order"** entry next to the cart icon opens
+  a lookup page (`/track-order`) where the customer enters the **email used at
+  checkout + the order number**. On a match it shows a **read-only, privacy-minimal
+  order view**: status, items, total, a coarse ship-to location (city/state/country),
+  and tracking details once shipped. Full delivery address and all payment metadata
+  are deliberately withheld, and there are no status-change controls. A wrong
+  email/order combination returns the same "not found" message so order numbers
+  can't be enumerated.
 - **Service offline** — if the API can't be reached, the customer is redirected
   to a "service currently offline" page.
 
 ### Admin site (requires admin login)
 - **Products** — list (id, name, price, current stock) with in-memory column
   sorting; edit any field except id/SKU/status; "delete" deactivates the product
-  (soft delete — hidden from the storefront and the admin list); CSV batch upload
-  with a confirm step and a success/warning/error message area.
+  (soft delete — hidden from the storefront and the admin list). Deactivation goes
+  through a **confirmation dialog** and **sets stock to 0**, so a later reactivation
+  (e.g. via batch upload) never resurrects stale inventory. CSV batch upload has a
+  confirm step and a success/warning/error message area; the file selection is
+  cleared after each run to avoid accidental re-submission.
 - **Orders** — list (id, placed date, total, customer name) with in-memory
   filters by **status (defaults to Open / not-yet-sent)**, id, customer name, and
   placed date; order detail shows full order info and lets the admin mark an
-  order **Delivered**, capturing shipping service + tracking number.
+  order **Delivered**, capturing shipping service + tracking number. An `Open`
+  order can also be **Cancelled** (via a confirmation dialog); cancelling returns
+  in-stock items to inventory (active products only) and is irreversible.
 
 ---
 
@@ -133,8 +157,9 @@ downloaded on **June 14th, 2026**.)
 | POST | `/api/products/batch-upload` | Admin | CSV upload |
 | POST | `/api/orders` | Public | Create order (+ fake payment) |
 | GET | `/api/orders` | Admin | Paged list + filters |
-| GET | `/api/orders/{id}` | Admin | Single order |
+| GET | `/api/orders/{id}` | Admin | Single order (full detail) |
 | GET | `/api/orders/validate` | Public | Check order exists by id + email |
+| GET | `/api/orders/lookup` | Public | Customer order tracking by id + email → privacy-minimal view |
 | PATCH | `/api/orders/{id}/status` | Admin | Update status (+ shipping when Delivered) |
 
 ---

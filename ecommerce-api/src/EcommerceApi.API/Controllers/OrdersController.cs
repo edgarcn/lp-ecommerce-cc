@@ -39,6 +39,21 @@ public class OrdersController(OrderService orderService) : ControllerBase
         return exists ? Ok(new { exists = true }) : NotFound(new { exists = false });
     }
 
+    // Public customer-facing lookup: returns a privacy-minimal order view when the
+    // order id + email match. 404 covers both "not found" and "email mismatch".
+    [HttpGet("lookup")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Lookup([FromQuery] int orderId, [FromQuery] string? customerEmail)
+    {
+        if (orderId <= 0 || string.IsNullOrWhiteSpace(customerEmail))
+            return BadRequest(new { message = "Order id and email are required." });
+
+        var order = await orderService.GetForCustomerAsync(orderId, customerEmail);
+        return order is null
+            ? NotFound(new { message = "No order found for that email and order number." })
+            : Ok(order);
+    }
+
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> Create([FromBody] CreateOrderRequest req)

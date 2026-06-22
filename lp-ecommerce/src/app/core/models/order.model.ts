@@ -76,3 +76,18 @@ export interface OrderLineDto {
   discount: number;
   totalLine: number;
 }
+
+// Privacy-minimal order view returned by the public customer "track order"
+// lookup. Excludes payment metadata and the full delivery address.
+export interface CustomerOrderView {
+  orderId: number;
+  placedDate: string;
+  customerFirstName: string;
+  orderStatus: OrderStatus;
+  shipToCity: string;
+  shipToState: string;
+  shipToCountryRegion: string;
+  shippingInfo: { shippingServiceName: string; trackingNumber: string } | null;
+  orderLines: OrderLineDto[];
+  total: number;
+}
