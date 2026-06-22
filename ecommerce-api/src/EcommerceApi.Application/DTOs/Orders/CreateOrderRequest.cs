@@ -11,9 +11,6 @@ public record CreateOrderRequest(
     [Required] PaymentRequest Payment,
     [Required][MinLength(1)] IEnumerable<CreateOrderLineRequest> OrderLines);
 
-// What the fake payment form submits. Only the cardholder name, method, and the
-// raw card number are accepted; the service keeps just the brand + last 4 digits
-// and never persists the full number.
 public record PaymentRequest(
     PaymentMethod Method,
     [Required][MaxLength(200)] string CardholderName,

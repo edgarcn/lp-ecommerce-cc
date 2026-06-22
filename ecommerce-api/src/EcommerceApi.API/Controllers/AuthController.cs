@@ -38,10 +38,6 @@ public class AuthController(IConfiguration config) : ControllerBase
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-        // Secure tracks whether we are actually served over HTTPS, NOT the environment
-        // name. A container defaults to the Production environment but the demo runs over
-        // plain HTTP; setting Secure=true there would make the browser silently drop the
-        // cookie and break admin login. Real production sets Security__RequireHttps=true.
         Response.Cookies.Append(CookieName, tokenString, new CookieOptions
         {
             HttpOnly = true,

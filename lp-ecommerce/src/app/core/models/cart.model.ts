@@ -23,6 +23,5 @@ export interface CheckoutDraft {
     cardNumber: string;
     cardholderName: string;
     expiry: string;
-    // CVV is intentionally never persisted, even in the draft.
   };
 }

@@ -18,8 +18,6 @@ export class AdminOrderList {
   readonly error = signal(false);
   private readonly orders = signal<OrderDto[]>([]);
 
-  // Filters (applied in memory). Status defaults to Open so admins see orders
-  // that still need to be sent; '' means "all statuses".
   readonly filterId = signal('');
   readonly filterName = signal('');
   readonly filterDate = signal('');

@@ -1,0 +1,5 @@
+# Local environment / secrets (committed example lives in .env.example)
+.env
+
+# Tooling
+.claude/

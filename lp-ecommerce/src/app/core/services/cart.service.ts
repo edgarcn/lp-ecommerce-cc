@@ -68,11 +68,6 @@ export class CartService {
     this.commit([]);
   }
 
-  /**
-   * Re-checks every cart item against live stock. Reduces quantities that
-   * exceed available stock and removes items that are out of stock.
-   * Returns the list of adjustments so the caller can notify the customer.
-   */
   async validateStock(): Promise<StockAdjustment[]> {
     const adjustments: StockAdjustment[] = [];
     const next: CartItem[] = [];
@@ -82,7 +77,6 @@ export class CartService {
       try {
         product = await firstValueFrom(this.productService.getById(item.productId));
       } catch {
-        // Product no longer retrievable (deleted/inactive) -> treat as out of stock.
         adjustments.push({ name: item.name, type: 'removed' });
         continue;
       }

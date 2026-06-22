@@ -1,10 +1,5 @@
 import { Component, input } from '@angular/core';
 
-/**
- * Generic product image. Dynamic per-product image storage is out of scope for
- * the demo, so we render a shared placeholder asset. The 'detail' variant uses
- * a larger artwork for the product detail view; everything else uses the list image.
- */
 @Component({
   selector: 'app-product-image',
   template: `

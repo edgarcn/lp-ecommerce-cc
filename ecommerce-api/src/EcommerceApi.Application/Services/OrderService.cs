@@ -27,9 +27,6 @@ public class OrderService(
     public Task<bool> ExistsAsync(int orderId, string customerEmail) =>
         orderRepo.ExistsAsync(orderId, customerEmail);
 
-    // Public customer lookup: returns a privacy-minimal view only when the order
-    // id AND email match. Returns null for both "not found" and "email mismatch"
-    // so callers cannot enumerate which order ids exist.
     public async Task<CustomerOrderDto?> GetForCustomerAsync(int orderId, string customerEmail)
     {
         var order = await orderRepo.GetByIdAsync(orderId);
@@ -94,8 +91,6 @@ public class OrderService(
             }).ToList()
         };
 
-        // Fake payment gateway: always approves and returns a transaction reference.
-        // Only safe card metadata (brand + last 4) is kept — never the full number.
         var digitsOnly = new string(req.Payment.CardNumber.Where(char.IsDigit).ToArray());
         order.Payment = new OrderPayment
         {
@@ -110,7 +105,6 @@ public class OrderService(
             ProcessedAt = DateTime.UtcNow
         };
 
-        // Deduct stock
         foreach (var line in order.OrderLines)
         {
             var product = products.First(p => p.ProductId == line.ProductId);
@@ -145,9 +139,6 @@ public class OrderService(
             };
         }
 
-        // Cancelling returns reserved quantities to inventory. Inactive
-        // (soft-deleted) products are skipped: their stock is intentionally
-        // pinned at 0, so we don't resurrect inventory for them.
         if (req.OrderStatus == OrderStatus.Cancelled)
         {
             foreach (var line in order.OrderLines)

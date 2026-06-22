@@ -28,7 +28,6 @@ export class OrderService {
     return this.http.get<OrderDto>(`${this.baseUrl}/${orderId}`);
   }
 
-  /** Public customer lookup by order id + email; returns a privacy-minimal view. */
   lookup(orderId: number, customerEmail: string): Observable<CustomerOrderView> {
     const params = new HttpParams()
       .set('orderId', String(orderId))

@@ -10,8 +10,6 @@ public class OrderPayment
     public PaymentMethod Method { get; set; }
     public PaymentStatus Status { get; set; }
 
-    // Only safe, non-sensitive card metadata is ever stored. Never the full
-    // card number, CVV, or expiry — exactly what a real gateway returns after tokenizing.
     public string CardBrand { get; set; } = string.Empty;
     public string CardLast4 { get; set; } = string.Empty;
     public string CardholderName { get; set; } = string.Empty;

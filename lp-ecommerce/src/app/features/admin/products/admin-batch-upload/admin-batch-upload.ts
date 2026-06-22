@@ -42,8 +42,6 @@ export class AdminBatchUpload {
         this.uploading.set(false);
       },
       error: (err: HttpErrorResponse) => {
-        // Browser aborts the request with status 0 and a ProgressEvent error
-        // when the file was modified on disk after it was selected.
         if (err.status === 0 && err.error instanceof ProgressEvent) {
           this.requestError.set(
             'The file was modified after it was selected. Please choose the file again before uploading.'
@@ -53,7 +51,6 @@ export class AdminBatchUpload {
           this.uploading.set(false);
           return;
         }
-        // The API returns the result body (with errors) on a 400 too.
         if (err?.error && Array.isArray(err.error.errors)) {
           this.result.set(err.error as BatchUploadResult);
         } else {
