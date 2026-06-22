@@ -27,6 +27,19 @@ public class OrderService(
     public Task<bool> ExistsAsync(int orderId, string customerEmail) =>
         orderRepo.ExistsAsync(orderId, customerEmail);
 
+    // Public customer lookup: returns a privacy-minimal view only when the order
+    // id AND email match. Returns null for both "not found" and "email mismatch"
+    // so callers cannot enumerate which order ids exist.
+    public async Task<CustomerOrderDto?> GetForCustomerAsync(int orderId, string customerEmail)
+    {
+        var order = await orderRepo.GetByIdAsync(orderId);
+        if (order is null ||
+            !string.Equals(order.Customer.Email, customerEmail.Trim(), StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        return ToCustomerDto(order);
+    }
+
     public async Task<(OrderDto? Result, string? Error)> CreateAsync(CreateOrderRequest req)
     {
         var productIds = req.OrderLines.Select(l => l.ProductId).Distinct().ToList();
@@ -132,6 +145,18 @@ public class OrderService(
             };
         }
 
+        // Cancelling returns reserved quantities to inventory. Inactive
+        // (soft-deleted) products are skipped: their stock is intentionally
+        // pinned at 0, so we don't resurrect inventory for them.
+        if (req.OrderStatus == OrderStatus.Cancelled)
+        {
+            foreach (var line in order.OrderLines)
+            {
+                if (line.Product.Active)
+                    line.Product.CurrentStock += line.Quantity;
+            }
+        }
+
         await orderRepo.SaveChangesAsync();
         return (ToDto(order), null);
     }
@@ -162,6 +187,28 @@ public class OrderService(
             o.Payment.Currency,
             o.Payment.TransactionReference,
             o.Payment.ProcessedAt),
+        o.ShippingInfo is null ? null : new ShippingInfoDto(
+            o.ShippingInfo.ShippingServiceName,
+            o.ShippingInfo.TrackingNumber),
+        o.OrderLines.Select(l => new OrderLineDto(
+            l.OrderLineId,
+            l.ProductId,
+            l.Product.Name,
+            l.Product.Sku,
+            l.Quantity,
+            l.BasePrice,
+            l.Discount,
+            l.TotalLine)),
+        o.OrderLines.Sum(l => l.TotalLine));
+
+    private static CustomerOrderDto ToCustomerDto(Order o) => new(
+        o.OrderId,
+        o.PlacedDate,
+        o.Customer.FirstName,
+        o.OrderStatus,
+        o.DeliveryAddress.City,
+        o.DeliveryAddress.State,
+        o.DeliveryAddress.CountryRegion,
         o.ShippingInfo is null ? null : new ShippingInfoDto(
             o.ShippingInfo.ShippingServiceName,
             o.ShippingInfo.TrackingNumber),

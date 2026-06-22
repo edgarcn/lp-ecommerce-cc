@@ -33,6 +33,10 @@
     }
 
     @if (ui.showSearch()) {
+      <a routerLink="/track-order" class="track-btn" aria-label="Track your order">
+        <span class="track-icon">📦</span>
+        <span class="track-label">Track order</span>
+      </a>
       <button class="cart-btn" (click)="ui.openPane()" aria-label="Open cart">
         <span class="cart-icon">🛒</span>
         @if (cart.count() > 0) {

@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CreateOrderRequest, OrderDto, OrderStatus } from '../models/order.model';
+import { CreateOrderRequest, CustomerOrderView, OrderDto, OrderStatus } from '../models/order.model';
 import { PagedResult } from '../models/product.model';
 
 export interface ShippingInfoRequest {
@@ -26,6 +26,14 @@ export class OrderService {
 
   getById(orderId: number): Observable<OrderDto> {
     return this.http.get<OrderDto>(`${this.baseUrl}/${orderId}`);
+  }
+
+  /** Public customer lookup by order id + email; returns a privacy-minimal view. */
+  lookup(orderId: number, customerEmail: string): Observable<CustomerOrderView> {
+    const params = new HttpParams()
+      .set('orderId', String(orderId))
+      .set('customerEmail', customerEmail);
+    return this.http.get<CustomerOrderView>(`${this.baseUrl}/lookup`, { params });
   }
 
   updateStatus(
