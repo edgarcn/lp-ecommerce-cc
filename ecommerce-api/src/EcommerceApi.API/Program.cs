@@ -3,9 +3,11 @@ using EcommerceApi.Domain.Repositories;
 using EcommerceApi.Infrastructure.Persistence;
 using EcommerceApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>(optional: true);
 
 builder.Services.AddControllers();
+
+// Rate limiting — 10 login attempts per minute per IP
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("login", opt =>
+    {
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.PermitLimit = 10;
+        opt.QueueLimit = 0;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -54,20 +69,56 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = builder.Configuration["Auth:JwtAudience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
         };
+        // Read the JWT from the httpOnly cookie instead of the Authorization header.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                ctx.Token = ctx.Request.Cookies["velour.admin.token"];
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
 
-// CORS — allow Angular dev server and production origins
+// CORS — allow Angular dev server and production origins.
+// AllowCredentials() is required for the httpOnly auth cookie to be sent cross-origin.
 builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
         policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [])
               .AllowAnyHeader()
-              .AllowAnyMethod()));
+              .AllowAnyMethod()
+              .AllowCredentials()));
 
 var app = builder.Build();
 
+// HTTPS hardening is opt-in via Security:RequireHttps (default false). It is left
+// OFF for the local Docker demo, which is served over plain HTTP with no TLS/domain:
+// enabling it would force HTTPS redirects, emit HSTS, and (combined with the Secure
+// cookie below) silently break admin login over http://localhost. In a real
+// production deployment behind TLS, set Security__RequireHttps=true.
+var requireHttps = builder.Configuration.GetValue<bool>("Security:RequireHttps");
+
+if (requireHttps)
+    app.UseHttpsRedirection();
+
+// Security response headers
+app.Use(async (ctx, next) =>
+{
+    ctx.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    ctx.Response.Headers["X-Frame-Options"] = "DENY";
+    ctx.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    ctx.Response.Headers["Content-Security-Policy"] = "default-src 'none'";
+    // HSTS is ignored by browsers over HTTP anyway, but only emit it when we are
+    // genuinely HTTPS-served to avoid pinning HTTPS on a developer's localhost.
+    if (requireHttps)
+        ctx.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
+    await next();
+});
+
 app.UseCors("AllowFrontend");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

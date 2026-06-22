@@ -13,7 +13,7 @@
   </div>
   <div class="f">
     <label>Order ID</label>
-    <input type="number" [ngModel]="filterId()" (ngModelChange)="filterId.set($event)" placeholder="e.g. 1" />
+    <input type="text" inputmode="numeric" pattern="[0-9]*" [ngModel]="filterId()" (ngModelChange)="filterId.set($event)" placeholder="e.g. 1" />
   </div>
   <div class="f">
     <label>Customer name</label>
