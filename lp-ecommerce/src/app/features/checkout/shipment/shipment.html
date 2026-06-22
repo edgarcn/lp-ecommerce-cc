@@ -18,12 +18,21 @@
     }
   </div>
 
-  <div class="field">
-    <label>Full Name <span class="required">*</span></label>
-    <input type="text" formControlName="fullname" />
-    @if (form.get('fullname')?.touched && form.get('fullname')?.invalid) {
-      <span class="error-text">Full name is required.</span>
-    }
+  <div class="row row-2col">
+    <div class="field">
+      <label>First Name <span class="required">*</span></label>
+      <input type="text" formControlName="firstName" />
+      @if (form.get('firstName')?.touched && form.get('firstName')?.invalid) {
+        <span class="error-text">First name is required.</span>
+      }
+    </div>
+    <div class="field">
+      <label>Last Name <span class="required">*</span></label>
+      <input type="text" formControlName="lastName" />
+      @if (form.get('lastName')?.touched && form.get('lastName')?.invalid) {
+        <span class="error-text">Last name is required.</span>
+      }
+    </div>
   </div>
 
   <div class="field">

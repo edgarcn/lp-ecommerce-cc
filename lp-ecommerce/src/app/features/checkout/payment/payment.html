@@ -50,8 +50,11 @@
         placeholder="MM/YY"
         inputmode="numeric"
       />
-      @if (form.get('expiry')?.touched && form.get('expiry')?.invalid) {
+      @if (form.get('expiry')?.touched && form.get('expiry')?.errors?.['pattern']) {
         <span class="error-text">Use MM/YY format.</span>
+      }
+      @if (form.get('expiry')?.touched && form.get('expiry')?.errors?.['cardExpired']) {
+        <span class="error-text">This card has expired.</span>
       }
     </div>
     <div class="field">
@@ -60,7 +63,7 @@
         type="password"
         formControlName="cvv"
         mask="000||0000"
-        placeholder="•••"
+        placeholder="3-4 digits"
         inputmode="numeric"
         autocomplete="off"
       />

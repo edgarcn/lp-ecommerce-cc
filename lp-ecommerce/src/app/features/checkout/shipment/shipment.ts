@@ -33,7 +33,8 @@ export class Shipment {
     {
       email: ['', [Validators.required, Validators.email]],
       emailConfirm: ['', [Validators.required, Validators.email]],
-      fullname: ['', Validators.required],
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
       countryRegion: ['', Validators.required],
       streetAddress: ['', Validators.required],
       unitSuiteNumber: [''],
@@ -64,7 +65,8 @@ export class Shipment {
     const v = this.form.getRawValue();
     this.state.setShipment({
       email: v.email!,
-      fullname: v.fullname!,
+      firstName: v.firstName!,
+      lastName: v.lastName!,
       countryRegion: v.countryRegion!,
       streetAddress: v.streetAddress!,
       unitSuiteNumber: v.unitSuiteNumber || undefined,

@@ -17,7 +17,7 @@ public record CreateOrderRequest(
 public record PaymentRequest(
     PaymentMethod Method,
     [Required][MaxLength(200)] string CardholderName,
-    [Required][CreditCard] string CardNumber);
+    [Required][MaxLength(20)] string CardNumber);
 
 public record CreateDeliveryAddressRequest(
     [Required][MaxLength(200)] string Fullname,

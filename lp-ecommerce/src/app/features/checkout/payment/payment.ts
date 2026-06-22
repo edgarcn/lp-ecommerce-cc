@@ -1,8 +1,18 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgxMaskDirective } from 'ngx-mask';
 import { CheckoutStateService } from '../../../core/services/checkout-state.service';
+
+function expiryNotExpired(control: AbstractControl): ValidationErrors | null {
+  const value = (control.value ?? '').replace('/', '');
+  if (value.length < 4) return null; // let format validator handle incomplete input
+  const month = parseInt(value.slice(0, 2), 10);
+  const year = 2000 + parseInt(value.slice(2, 4), 10);
+  const now = new Date();
+  const expiry = new Date(year, month, 1); // first day of the month AFTER expiry month
+  return expiry <= now ? { cardExpired: true } : null;
+}
 
 @Component({
   selector: 'app-payment',
@@ -18,7 +28,7 @@ export class Payment {
   readonly form = this.fb.group({
     cardNumber: ['', [Validators.required, Validators.pattern(/^[0-9 ]{13,23}$/)]],
     cardholderName: ['', Validators.required],
-    expiry: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/\d{2}$/)]],
+    expiry: ['', [Validators.required, Validators.pattern(/^(0[1-9]|1[0-2])\/?[0-9]{2}$/), expiryNotExpired]],
     cvv: ['', [Validators.required, Validators.pattern(/^\d{3,4}$/)]],
   });
 

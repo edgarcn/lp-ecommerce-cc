@@ -5,7 +5,7 @@
   <div class="info-card">
     <h3>📍 Delivery Address</h3>
     @if (draft().shipment; as s) {
-      <p class="name">{{ s.fullname }}</p>
+      <p class="name">{{ s.firstName }} {{ s.lastName }}</p>
       <p class="muted">
         @if (s.unitSuiteNumber) { {{ s.unitSuiteNumber }}<br /> }
         {{ s.streetAddress }}<br />

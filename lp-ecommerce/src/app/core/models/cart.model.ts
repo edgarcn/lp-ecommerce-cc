@@ -9,7 +9,8 @@ export interface CartItem {
 export interface CheckoutDraft {
   shipment?: {
     email: string;
-    fullname: string;
+    firstName: string;
+    lastName: string;
     countryRegion: string;
     streetAddress: string;
     unitSuiteNumber?: string;

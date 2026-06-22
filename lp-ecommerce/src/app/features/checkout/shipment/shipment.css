@@ -8,6 +8,9 @@ h1 { font-size: 1.8rem; }
   grid-template-columns: 2fr 1fr 1fr;
   gap: 16px;
 }
+.row-2col {
+  grid-template-columns: 1fr 1fr;
+}
 .actions {
   display: flex;
   justify-content: flex-end;
